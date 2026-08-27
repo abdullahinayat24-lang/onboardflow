@@ -30,12 +30,11 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Do not run Supabase Auth for public token routes or api routes
   const path = request.nextUrl.pathname;
   if (
     path.startsWith('/onboard') ||
     path.startsWith('/package') ||
-    path.startsWith('/api/cron') ||
+    path.startsWith('/api') ||
     path.startsWith('/_next') ||
     path.includes('/favicon.ico')
   ) {
@@ -43,9 +42,15 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Refresh auth session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Session check
+  }
+
+  const hasDemoCookie = request.cookies.get('demo_session')?.value === 'true';
 
   // Protected agency dashboard routes
   const isDashboardRoute =
@@ -56,19 +61,15 @@ export async function updateSession(request: NextRequest) {
 
   const isAuthRoute = path.startsWith('/login') || path.startsWith('/signup');
 
-  // If unauthenticated trying to access dashboard, redirect to login
-  if (!user && isDashboardRoute) {
-    // If Supabase URL is placeholder (development/demo mode without configured Supabase), pass through for local development preview
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
-      return supabaseResponse;
-    }
+  // Allow access if user is authenticated OR demo session cookie is set
+  if (!user && !hasDemoCookie && isDashboardRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
   // If authenticated user visits login/signup, redirect to dashboard
-  if (user && isAuthRoute) {
+  if ((user || hasDemoCookie) && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

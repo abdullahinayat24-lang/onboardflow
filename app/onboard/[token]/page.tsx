@@ -120,6 +120,9 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
     // Offline
   }
 
+  const template = localStore.getTemplate(client.questionnaire_template_id);
+  const stepConfig = template.step_config;
+
   return (
     <OnboardingWizard
       token={token}
@@ -127,6 +130,7 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
       client={client}
       questions={questions}
       checklistItems={checklistItems}
+      stepConfig={stepConfig}
       initialResponses={initialResponses}
       initialUploads={uploads}
       isInitiallyCompleted={client.status === 'completed'}

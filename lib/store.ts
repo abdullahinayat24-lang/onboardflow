@@ -17,7 +17,7 @@ class LocalDataStore {
   public agency: Agency = {
     id: 'demo-agency-001',
     owner_user_id: 'demo-user-001',
-    name: 'Velocity Creative Studio',
+    name: 'Velocity Creative & Professional Studio',
     slug: 'velocity-studio',
     logo_url: null,
     brand_color: '#3B82F6',
@@ -31,7 +31,7 @@ class LocalDataStore {
     updated_at: new Date().toISOString(),
   };
 
-  // Pre-configured Service-Specific Questionnaire Templates
+  // Pre-configured Service & Industry Specific Questionnaire Templates
   public templates: QuestionnaireTemplate[] = [
     {
       id: 'tpl_social_media',
@@ -40,6 +40,14 @@ class LocalDataStore {
       description: 'Intake for Instagram, Facebook, TikTok posting and monthly content calendar creation.',
       service_category: 'social_media',
       is_default: true,
+      step_config: {
+        enable_media_uploads: true,
+        enable_contract_upload: true,
+        enable_platform_access: true,
+        enable_payment_step: true,
+        media_upload_label: 'Brand Assets, Vector Logos & Raw Media',
+        contract_upload_label: 'Signed Social Media Service Agreement',
+      },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       questions: [
@@ -83,16 +91,104 @@ class LocalDataStore {
           order_index: 3,
           created_at: new Date().toISOString(),
         },
+      ],
+    },
+    {
+      id: 'tpl_accounting',
+      agency_id: 'demo-agency-001',
+      title: 'Accounting, Bookkeeping & Tax Filing',
+      description: 'Intake for accounting, tax filings, payroll, and financial statements without media clutter.',
+      service_category: 'accounting',
+      is_default: false,
+      step_config: {
+        enable_media_uploads: true,
+        enable_contract_upload: true,
+        enable_platform_access: false,
+        enable_payment_step: true,
+        media_upload_label: 'Prior Tax Returns, P&L & Bank Statements',
+        contract_upload_label: 'Signed Accounting Engagement Letter & NDA',
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      questions: [
         {
-          id: 'sm_q4',
-          template_id: 'tpl_social_media',
-          label: 'Are there specific hashtags, brand taglines, or topics to avoid?',
-          description: 'List any mandatory keywords or sensitive topics.',
-          placeholder: 'e.g. Always use #AcmeStyle, never mention competitor brands...',
+          id: 'ac_q1',
+          template_id: 'tpl_accounting',
+          label: 'What is your primary entity structure and Tax ID (EIN / VAT)?',
+          description: 'e.g. LLC, S-Corp, C-Corp, Sole Proprietorship.',
+          placeholder: 'e.g. S-Corp, EIN: 12-3456789',
+          type: 'short_text',
+          options: [],
+          required: true,
+          order_index: 1,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'ac_q2',
+          template_id: 'tpl_accounting',
+          label: 'What accounting or bookkeeping software do you currently use?',
+          description: 'Select your primary financial system.',
+          placeholder: '',
+          type: 'single_choice',
+          options: ['QuickBooks Online', 'Xero', 'FreshBooks', 'Excel / Manual Spreadsheets', 'None yet'],
+          required: true,
+          order_index: 2,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'ac_q3',
+          template_id: 'tpl_accounting',
+          label: 'What are your urgent tax deadlines or compliance priorities?',
+          description: 'List upcoming quarterly filings, payroll deadlines, or back tax needs.',
+          placeholder: 'e.g. Q3 Estimated Taxes due next month, need 2025 W-2s filed...',
           type: 'long_text',
           options: [],
-          required: false,
-          order_index: 4,
+          required: true,
+          order_index: 3,
+          created_at: new Date().toISOString(),
+        },
+      ],
+    },
+    {
+      id: 'tpl_supplier',
+      agency_id: 'demo-agency-001',
+      title: 'Supplier & Vendor Procurement Intake',
+      description: 'Intake for supplier qualification, manufacturing capacity, MOQ, and shipping terms.',
+      service_category: 'supplier_vendor',
+      is_default: false,
+      step_config: {
+        enable_media_uploads: true,
+        enable_contract_upload: true,
+        enable_platform_access: false,
+        enable_payment_step: false,
+        media_upload_label: 'Product Catalogs, Spec Sheets & Certifications',
+        contract_upload_label: 'Vendor Master Services Agreement & W-9',
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      questions: [
+        {
+          id: 'sup_q1',
+          template_id: 'tpl_supplier',
+          label: 'What is your primary product category and manufacturing turnaround time?',
+          description: 'Specify typical production turnaround and sample delivery times.',
+          placeholder: 'e.g. Custom apparel manufacturing, 3 weeks lead time, 5 days samples...',
+          type: 'long_text',
+          options: [],
+          required: true,
+          order_index: 1,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'sup_q2',
+          template_id: 'tpl_supplier',
+          label: 'What are your Minimum Order Quantities (MOQ) and tiered price discounts?',
+          description: 'Detail MOQ requirements per unit or SKU.',
+          placeholder: 'e.g. Minimum 100 units per style, 15% discount for 500+ units...',
+          type: 'long_text',
+          options: [],
+          required: true,
+          order_index: 2,
           created_at: new Date().toISOString(),
         },
       ],
@@ -104,6 +200,14 @@ class LocalDataStore {
       description: 'Intake for custom illustration, logo design, vector branding, and color palettes.',
       service_category: 'brand_design',
       is_default: false,
+      step_config: {
+        enable_media_uploads: true,
+        enable_contract_upload: true,
+        enable_platform_access: false,
+        enable_payment_step: true,
+        media_upload_label: 'Existing Logos, Moodboards & References',
+        contract_upload_label: 'Signed Design Agreement',
+      },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       questions: [
@@ -119,70 +223,6 @@ class LocalDataStore {
           order_index: 1,
           created_at: new Date().toISOString(),
         },
-        {
-          id: 'br_q2',
-          template_id: 'tpl_branding',
-          label: 'Do you have existing color palettes or hex codes?',
-          description: 'List your hex codes or describe color preferences.',
-          placeholder: 'e.g. Deep Navy #0F172A, Gold #EAB308, Off-white #F8FAFC...',
-          type: 'short_text',
-          options: [],
-          required: false,
-          order_index: 2,
-          created_at: new Date().toISOString(),
-        },
-      ],
-    },
-    {
-      id: 'tpl_video',
-      agency_id: 'demo-agency-001',
-      title: 'Video Production & Reel Editing',
-      description: 'Intake for short-form Reels, TikToks, YouTube, and promotional video edits.',
-      service_category: 'video_production',
-      is_default: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      questions: [
-        {
-          id: 'vd_q1',
-          template_id: 'tpl_video',
-          label: 'What video formats and aspect ratios do you need?',
-          description: 'Select all required export formats.',
-          placeholder: '',
-          type: 'single_choice',
-          options: [
-            'Vertical 9:16 (Instagram Reels & TikTok)',
-            'Horizontal 16:9 (YouTube & Website)',
-            'Both Vertical (9:16) and Horizontal (16:9)',
-          ],
-          required: true,
-          order_index: 1,
-          created_at: new Date().toISOString(),
-        },
-      ],
-    },
-    {
-      id: 'tpl_web',
-      agency_id: 'demo-agency-001',
-      title: 'Website & App Development',
-      description: 'Intake for web design, landing pages, Next.js, and web application projects.',
-      service_category: 'web_dev',
-      is_default: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      questions: [
-        {
-          id: 'wb_q1',
-          template_id: 'tpl_web',
-          label: 'What are the top 3 functionalities required on your site?',
-          description: 'e.g. Lead generation forms, stripe checkout, client portal, blog.',
-          placeholder: 'e.g. 1. Fast landing page, 2. Online booking system, 3. SEO optimization...',
-          type: 'long_text',
-          options: [],
-          required: true,
-          order_index: 1,
-          created_at: new Date().toISOString(),
-        },
       ],
     },
   ];
@@ -192,7 +232,7 @@ class LocalDataStore {
       id: 'c1',
       template_id: 'demo-c-001',
       label: 'Complete Intake Questionnaire',
-      description: 'Answer project vision, goals, and audience questions.',
+      description: 'Answer required questions.',
       category: 'questionnaire',
       required: true,
       order_index: 1,
@@ -202,7 +242,7 @@ class LocalDataStore {
       id: 'c2',
       template_id: 'demo-c-001',
       label: 'Upload Signed Contract / Agreement',
-      description: 'Provide signed service agreement or MSA.',
+      description: 'Provide signed service agreement or engagement letter.',
       category: 'contract',
       required: true,
       order_index: 2,
@@ -211,21 +251,11 @@ class LocalDataStore {
     {
       id: 'c3',
       template_id: 'demo-c-001',
-      label: 'Upload Brand Assets & Raw Photos',
-      description: 'Vector SVG/PNG logos, product photos, and design files.',
+      label: 'Upload Required Documents or Assets',
+      description: 'Upload required files, tax docs, or brand assets.',
       category: 'asset',
       required: true,
       order_index: 3,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 'c4',
-      template_id: 'demo-c-001',
-      label: 'Share Platform & Social Media Access',
-      description: 'Instagram handle, Meta Business ID, or Google Drive folder.',
-      category: 'access',
-      required: false,
-      order_index: 4,
       created_at: new Date().toISOString(),
     },
   ];
@@ -276,23 +306,9 @@ class LocalDataStore {
 
     const checkMap = new Map<string, boolean>();
     checkMap.set('c1', true);
+    checkMap.set('c2', true);
     checkMap.set('c3', true);
-    checkMap.set('c4', true);
     this.checklistStatus.set(initialClient.id, checkMap);
-
-    this.uploads.set(initialClient.id, [
-      {
-        id: 'up_1',
-        client_id: initialClient.id,
-        category: 'brand',
-        filename: 'acme-primary-logo.svg',
-        file_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe',
-        storage_path: 'uploads/acme-primary-logo.svg',
-        file_size: 245800,
-        mime_type: 'image/svg+xml',
-        uploaded_at: new Date().toISOString(),
-      },
-    ]);
   }
 
   public static getInstance(): LocalDataStore {
@@ -320,6 +336,10 @@ class LocalDataStore {
     if (!id) return this.templates[0];
     const found = this.templates.find((t) => t.id === id);
     return found || this.templates[0];
+  }
+
+  public addTemplate(template: QuestionnaireTemplate) {
+    this.templates.unshift(template);
   }
 
   public getClientWithDetails(clientId: string): ClientWithDetails | undefined {
@@ -372,7 +392,7 @@ class LocalDataStore {
       checklist_template: {
         id: 'demo-c-001',
         agency_id: this.agency.id,
-        title: 'Standard Creative Onboarding Checklist',
+        title: 'Standard Onboarding Checklist',
         is_default: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

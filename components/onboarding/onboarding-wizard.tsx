@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Agency,
   Client,
@@ -9,6 +9,7 @@ import {
   Upload,
   PlatformAccessLocker,
   PaymentInfo,
+  TemplateStepConfig,
 } from '@/types';
 import { BrandingHeader } from './branding-header';
 import { WizardStepWelcome } from './wizard-step-welcome';
@@ -23,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-export type ExtendedWizardStep =
+export type WizardStepId =
   | 'welcome'
   | 'questionnaire'
   | 'assets'
@@ -39,6 +40,7 @@ interface OnboardingWizardProps {
   client: Client;
   questions: QuestionnaireQuestion[];
   checklistItems: ChecklistTemplateItem[];
+  stepConfig?: TemplateStepConfig;
   initialResponses: Record<string, any>;
   initialUploads: Upload[];
   isInitiallyCompleted: boolean;
@@ -50,12 +52,53 @@ export function OnboardingWizard({
   client,
   questions,
   checklistItems,
+  stepConfig,
   initialResponses,
   initialUploads,
   isInitiallyCompleted,
 }: OnboardingWizardProps) {
   const { success, error } = useToast();
-  const [currentStep, setCurrentStep] = useState<ExtendedWizardStep>(
+  
+  // Default step configuration if not explicitly provided
+  const config: TemplateStepConfig = stepConfig || {
+    enable_media_uploads: true,
+    enable_contract_upload: true,
+    enable_platform_access: true,
+    enable_payment_step: true,
+    media_upload_label: 'Brand Assets & Media',
+    contract_upload_label: 'Signed Agreement & Contract',
+  };
+
+  // Build active dynamic steps based on template configuration
+  const activeSteps = useMemo(() => {
+    const s: { id: WizardStepId; label: string }[] = [
+      { id: 'welcome', label: 'Welcome' },
+      { id: 'questionnaire', label: 'Intake Questionnaire' },
+    ];
+
+    if (config.enable_media_uploads !== false) {
+      s.push({ id: 'assets', label: config.media_upload_label || 'Documents & Assets' });
+    }
+
+    if (config.enable_contract_upload !== false) {
+      s.push({ id: 'contract', label: config.contract_upload_label || 'Agreement & Contract' });
+    }
+
+    if (config.enable_platform_access !== false) {
+      s.push({ id: 'access', label: 'Platform & Cloud Access' });
+    }
+
+    if (config.enable_payment_step !== false) {
+      s.push({ id: 'payment', label: 'Kickoff Retainer' });
+    }
+
+    s.push({ id: 'checklist', label: 'Review & Submit' });
+    s.push({ id: 'completed', label: 'Completed' });
+
+    return s;
+  }, [config]);
+
+  const [currentStep, setCurrentStep] = useState<WizardStepId>(
     isInitiallyCompleted ? 'completed' : 'welcome'
   );
   const [responses, setResponses] = useState<Record<string, any>>(initialResponses);
@@ -70,7 +113,7 @@ export function OnboardingWizard({
   );
   const [payment, setPayment] = useState<PaymentInfo>(
     client.payment || {
-      required: false,
+      required: config.enable_payment_step || false,
       amount_cents: 0,
       currency: 'USD',
       is_paid: false,
@@ -78,19 +121,21 @@ export function OnboardingWizard({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const steps: { id: ExtendedWizardStep; label: string }[] = [
-    { id: 'welcome', label: 'Welcome' },
-    { id: 'questionnaire', label: 'Intake Questionnaire' },
-    { id: 'assets', label: 'Brand Assets & Media' },
-    { id: 'contract', label: 'Agreement & Contract' },
-    { id: 'access', label: 'Platform & Cloud Access' },
-    { id: 'payment', label: 'Kickoff Retainer' },
-    { id: 'checklist', label: 'Review & Submit' },
-    { id: 'completed', label: 'Completed' },
-  ];
+  const currentStepIndex = activeSteps.findIndex((s) => s.id === currentStep);
+  const currentStepName = activeSteps[currentStepIndex]?.label || 'Onboarding';
 
-  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
-  const currentStepName = steps[currentStepIndex]?.label || 'Onboarding';
+  // Navigation helpers that jump between dynamically enabled steps
+  const goToNextStep = () => {
+    if (currentStepIndex < activeSteps.length - 1) {
+      setCurrentStep(activeSteps[currentStepIndex + 1].id);
+    }
+  };
+
+  const goToPrevStep = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStep(activeSteps[currentStepIndex - 1].id);
+    }
+  };
 
   const handleSaveQuestionnaire = async (newResponses: Record<string, any>) => {
     setResponses(newResponses);
@@ -106,7 +151,7 @@ export function OnboardingWizard({
     } catch (err) {
       console.warn('Auto-save notice:', err);
     }
-    setCurrentStep('assets');
+    goToNextStep();
   };
 
   const handleUploadSuccess = (newUpload: Upload) => {
@@ -160,7 +205,7 @@ export function OnboardingWizard({
         <BrandingHeader
           agency={agency}
           currentStepIndex={currentStepIndex}
-          totalSteps={steps.length - 1}
+          totalSteps={activeSteps.length - 1}
           stepName={currentStepName}
         />
 
@@ -170,7 +215,7 @@ export function OnboardingWizard({
               agency={agency}
               client={client}
               checklistItems={checklistItems}
-              onStart={() => setCurrentStep('questionnaire')}
+              onStart={goToNextStep}
             />
           )}
 
@@ -180,7 +225,7 @@ export function OnboardingWizard({
               questions={questions}
               initialResponses={responses}
               onSaveAndNext={handleSaveQuestionnaire}
-              onBack={() => setCurrentStep('welcome')}
+              onBack={goToPrevStep}
             />
           )}
 
@@ -191,8 +236,8 @@ export function OnboardingWizard({
               uploads={uploads}
               onUploadSuccess={handleUploadSuccess}
               onDeleteUpload={handleDeleteUpload}
-              onNext={() => setCurrentStep('contract')}
-              onBack={() => setCurrentStep('questionnaire')}
+              onNext={goToNextStep}
+              onBack={goToPrevStep}
             />
           )}
 
@@ -203,8 +248,8 @@ export function OnboardingWizard({
               uploads={uploads}
               onUploadSuccess={handleUploadSuccess}
               onDeleteUpload={handleDeleteUpload}
-              onNext={() => setCurrentStep('access')}
-              onBack={() => setCurrentStep('assets')}
+              onNext={goToNextStep}
+              onBack={goToPrevStep}
             />
           )}
 
@@ -218,7 +263,7 @@ export function OnboardingWizard({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentStep('contract')}
+                  onClick={goToPrevStep}
                   className="text-xs gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -226,10 +271,10 @@ export function OnboardingWizard({
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setCurrentStep('payment')}
+                  onClick={goToNextStep}
                   className="text-xs gap-1.5 cursor-pointer bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800"
                 >
-                  Next: Retainer / Deposit &rarr;
+                  Next Step &rarr;
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -247,7 +292,7 @@ export function OnboardingWizard({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentStep('access')}
+                  onClick={goToPrevStep}
                   className="text-xs gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -255,7 +300,7 @@ export function OnboardingWizard({
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setCurrentStep('checklist')}
+                  onClick={goToNextStep}
                   className="text-xs gap-1.5 cursor-pointer bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800"
                 >
                   Next: Final Review &rarr;
@@ -273,7 +318,7 @@ export function OnboardingWizard({
               uploads={uploads}
               checklistItems={checklistItems}
               onSubmit={handleSubmitAll}
-              onBack={() => setCurrentStep('payment')}
+              onBack={goToPrevStep}
               isSubmitting={isSubmitting}
             />
           )}

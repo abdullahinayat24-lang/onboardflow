@@ -15,7 +15,19 @@ export type ServiceCategory =
   | 'brand_design'
   | 'video_production'
   | 'web_dev'
+  | 'accounting'
+  | 'supplier_vendor'
+  | 'legal_government'
   | 'general';
+
+export interface TemplateStepConfig {
+  enable_media_uploads: boolean;
+  enable_contract_upload: boolean;
+  enable_platform_access: boolean;
+  enable_payment_step: boolean;
+  media_upload_label?: string;
+  contract_upload_label?: string;
+}
 
 export interface Agency {
   id: string;
@@ -79,6 +91,7 @@ export interface QuestionnaireTemplate {
   title: string;
   description: string | null;
   service_category?: ServiceCategory;
+  step_config?: TemplateStepConfig;
   is_default: boolean;
   created_at: string;
   updated_at: string;

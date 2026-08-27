@@ -4,6 +4,7 @@ import { submitOnboardingSchema } from '@/lib/validations/onboarding';
 import { generateProjectBrief } from '@/lib/ai';
 import { BriefGenerationContext } from '@/lib/ai/prompts';
 import { sendCompletionNotification } from '@/lib/email/resend';
+import { dispatchAgencyWebhooks } from '@/lib/notifications/webhook';
 import { localStore } from '@/lib/store';
 import { ProjectBrief } from '@/types';
 
@@ -58,6 +59,8 @@ export async function POST(request: NextRequest) {
       clientRecord.status = 'completed';
       clientRecord.completed_at = completedAt;
       clientRecord.last_activity_at = completedAt;
+      if (body.platform_access) clientRecord.platform_access = body.platform_access;
+      if (body.payment) clientRecord.payment = body.payment;
       localStore.clients.set(client.id, clientRecord);
     }
 
@@ -122,6 +125,15 @@ export async function POST(request: NextRequest) {
     } catch {
       // Offline fallback
     }
+
+    // Trigger Webhook & WhatsApp/Slack alerts
+    const targetAgency = fullClient.agency || localStore.agency;
+    dispatchAgencyWebhooks(
+      targetAgency,
+      fullClient,
+      savedBrief,
+      uploadedFiles.length
+    ).catch((e) => console.warn('Webhook dispatch alert notice:', e));
 
     return NextResponse.json({ success: true, completed_at: completedAt });
   } catch (err: unknown) {

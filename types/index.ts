@@ -1,44 +1,171 @@
-import { Database } from './database';
-
-export type Agency = Database['public']['Tables']['agencies']['Row'];
-export type Client = Database['public']['Tables']['clients']['Row'];
-export type QuestionnaireTemplate = Database['public']['Tables']['questionnaire_templates']['Row'];
-export type QuestionnaireQuestion = Database['public']['Tables']['questionnaire_questions']['Row'];
-export type QuestionnaireResponse = Database['public']['Tables']['questionnaire_responses']['Row'];
-export type ChecklistTemplate = Database['public']['Tables']['checklist_templates']['Row'];
-export type ChecklistTemplateItem = Database['public']['Tables']['checklist_template_items']['Row'];
-export type ClientChecklistStatus = Database['public']['Tables']['client_checklist_status']['Row'];
-export type Upload = Database['public']['Tables']['uploads']['Row'];
-export type ProjectBrief = Database['public']['Tables']['project_briefs']['Row'];
-export type ReminderSetting = Database['public']['Tables']['reminder_settings']['Row'];
-export type ReminderLog = Database['public']['Tables']['reminder_log']['Row'];
+// Core Domain Types for OnboardFlow
 
 export type ClientStatus = 'invited' | 'in_progress' | 'completed';
+export type BriefStatus = 'draft' | 'approved' | 'final';
+export type QuestionType =
+  | 'short_text'
+  | 'long_text'
+  | 'single_choice'
+  | 'multiple_choice'
+  | 'number'
+  | 'url';
 
-export interface ClientWithDetails extends Client {
-  agency?: Agency;
-  questionnaire_template?: QuestionnaireTemplate & {
-    questions: QuestionnaireQuestion[];
-  };
-  checklist_template?: ChecklistTemplate & {
-    items: ChecklistTemplateItem[];
-  };
-  responses?: (QuestionnaireResponse & { question?: QuestionnaireQuestion })[];
-  checklist_status?: (ClientChecklistStatus & { item?: ChecklistTemplateItem })[];
-  uploads?: Upload[];
-  brief?: ProjectBrief | null;
-  completion_percentage?: number;
+export type ServiceCategory =
+  | 'social_media'
+  | 'brand_design'
+  | 'video_production'
+  | 'web_dev'
+  | 'general';
+
+export interface Agency {
+  id: string;
+  owner_user_id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  brand_color: string;
+  website: string | null;
+  support_email: string | null;
+  webhook_url?: string | null;
+  whatsapp_webhook_url?: string | null;
+  slack_webhook_url?: string | null;
+  stripe_payment_link?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface ClientOnboardingData {
-  client: Client;
-  agency: Agency;
-  questions: QuestionnaireQuestion[];
-  checklist_items: ChecklistTemplateItem[];
-  responses: Record<string, string | string[]>;
-  checklist_status: Record<string, boolean>;
-  uploads: Upload[];
+export interface PlatformAccessLocker {
+  instagram_handle?: string | null;
+  facebook_page_url?: string | null;
+  meta_business_id?: string | null;
+  google_drive_folder_url?: string | null;
+  dropbox_folder_url?: string | null;
+  canva_or_figma_link?: string | null;
+  login_credentials_notes?: string | null;
+}
+
+export interface PaymentInfo {
+  required: boolean;
+  amount_cents?: number;
+  currency?: string;
+  stripe_checkout_url?: string | null;
+  is_paid: boolean;
+  paid_at?: string | null;
+}
+
+export interface Client {
+  id: string;
+  agency_id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  service_category?: ServiceCategory;
+  status: ClientStatus;
+  onboarding_token: string;
+  package_share_token: string;
+  questionnaire_template_id: string | null;
+  checklist_template_id: string | null;
+  platform_access?: PlatformAccessLocker | null;
+  payment?: PaymentInfo | null;
+  last_activity_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuestionnaireTemplate {
+  id: string;
+  agency_id: string;
+  title: string;
+  description: string | null;
+  service_category?: ServiceCategory;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+  questions?: QuestionnaireQuestion[];
+}
+
+export interface QuestionnaireQuestion {
+  id: string;
+  template_id: string;
+  label: string;
+  description: string | null;
+  placeholder: string | null;
+  type: QuestionType;
+  options?: string[];
+  required: boolean;
+  order_index: number;
+  created_at: string;
+}
+
+export interface ChecklistTemplate {
+  id: string;
+  agency_id: string;
+  title: string;
+  service_category?: ServiceCategory;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+  items?: ChecklistTemplateItem[];
+}
+
+export interface ChecklistTemplateItem {
+  id: string;
+  template_id: string;
+  label: string;
+  description: string | null;
+  category: 'questionnaire' | 'contract' | 'asset' | 'access' | 'other' | 'general';
+  required: boolean;
+  order_index: number;
+  created_at: string;
+}
+
+export interface QuestionnaireResponse {
+  id: string;
+  client_id: string;
+  question_id: string;
+  answer: string | null;
+  answer_json: any | null;
+  submitted_at: string;
+  updated_at: string;
+  question?: QuestionnaireQuestion;
+}
+
+export interface ClientChecklistStatus {
+  id: string;
+  client_id: string;
+  checklist_item_id: string;
   is_completed: boolean;
+  completed_at: string | null;
+  notes: string | null;
+  item?: ChecklistTemplateItem;
+}
+
+export interface Upload {
+  id: string;
+  client_id: string;
+  category: string;
+  filename: string;
+  file_url: string;
+  storage_path: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_at: string;
+}
+
+export interface ProjectBrief {
+  id: string;
+  client_id: string;
+  ai_summary: string | null;
+  ai_brief: string | null;
+  status: BriefStatus;
+  goals?: string[];
+  scope?: string[];
+  key_assets?: string[];
+  open_gaps?: string[];
+  next_steps?: string[];
+  generated_at: string;
+  edited_at: string;
 }
 
 export interface AIGeneratedBriefOutput {
@@ -51,10 +178,25 @@ export interface AIGeneratedBriefOutput {
   next_steps: string[];
 }
 
-export type OnboardingWizardStep = 
-  | 'welcome'
-  | 'questionnaire'
-  | 'assets'
-  | 'contract'
-  | 'checklist'
-  | 'completed';
+export interface ReminderSetting {
+  id: string;
+  agency_id: string;
+  inactivity_delay_hours: number;
+  max_reminders: number;
+  is_active: boolean;
+  email_subject: string | null;
+  email_body_template: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientWithDetails extends Client {
+  agency?: Agency;
+  questionnaire_template?: QuestionnaireTemplate;
+  checklist_template?: ChecklistTemplate;
+  brief?: ProjectBrief | null;
+  responses?: QuestionnaireResponse[];
+  checklist_status?: ClientChecklistStatus[];
+  uploads?: Upload[];
+  completion_percentage?: number;
+}

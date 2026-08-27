@@ -63,7 +63,7 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
     // Offline
   }
   if (questions.length === 0) {
-    questions = localStore.questions;
+    questions = localStore.getTemplate(client.questionnaire_template_id).questions || [];
   }
 
   // Fetch Checklist Items
@@ -155,7 +155,7 @@ function renderDemoOnboarding(token: string) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }}
-      questions={localStore.questions}
+      questions={localStore.templates[0].questions || []}
       checklistItems={localStore.checklistItems}
       initialResponses={{}}
       initialUploads={[]}

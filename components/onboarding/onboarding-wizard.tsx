@@ -7,16 +7,31 @@ import {
   QuestionnaireQuestion,
   ChecklistTemplateItem,
   Upload,
-  OnboardingWizardStep,
+  PlatformAccessLocker,
+  PaymentInfo,
 } from '@/types';
 import { BrandingHeader } from './branding-header';
 import { WizardStepWelcome } from './wizard-step-welcome';
 import { WizardStepQuestionnaire } from './wizard-step-questionnaire';
 import { WizardStepUploads } from './wizard-step-uploads';
 import { WizardStepContract } from './wizard-step-contract';
+import { WizardStepAccess } from './wizard-step-access';
+import { WizardStepPayment } from './wizard-step-payment';
 import { WizardStepReview } from './wizard-step-review';
 import { WizardStepComplete } from './wizard-step-complete';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+export type ExtendedWizardStep =
+  | 'welcome'
+  | 'questionnaire'
+  | 'assets'
+  | 'contract'
+  | 'access'
+  | 'payment'
+  | 'checklist'
+  | 'completed';
 
 interface OnboardingWizardProps {
   token: string;
@@ -40,18 +55,36 @@ export function OnboardingWizard({
   isInitiallyCompleted,
 }: OnboardingWizardProps) {
   const { success, error } = useToast();
-  const [currentStep, setCurrentStep] = useState<OnboardingWizardStep>(
+  const [currentStep, setCurrentStep] = useState<ExtendedWizardStep>(
     isInitiallyCompleted ? 'completed' : 'welcome'
   );
   const [responses, setResponses] = useState<Record<string, any>>(initialResponses);
   const [uploads, setUploads] = useState<Upload[]>(initialUploads);
+  const [accessData, setAccessData] = useState<PlatformAccessLocker>(
+    client.platform_access || {
+      instagram_handle: '',
+      facebook_page_url: '',
+      google_drive_folder_url: '',
+      login_credentials_notes: '',
+    }
+  );
+  const [payment, setPayment] = useState<PaymentInfo>(
+    client.payment || {
+      required: false,
+      amount_cents: 0,
+      currency: 'USD',
+      is_paid: false,
+    }
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const steps: { id: OnboardingWizardStep; label: string }[] = [
+  const steps: { id: ExtendedWizardStep; label: string }[] = [
     { id: 'welcome', label: 'Welcome' },
     { id: 'questionnaire', label: 'Intake Questionnaire' },
-    { id: 'assets', label: 'Brand Assets' },
+    { id: 'assets', label: 'Brand Assets & Media' },
     { id: 'contract', label: 'Agreement & Contract' },
+    { id: 'access', label: 'Platform & Cloud Access' },
+    { id: 'payment', label: 'Kickoff Retainer' },
     { id: 'checklist', label: 'Review & Submit' },
     { id: 'completed', label: 'Completed' },
   ];
@@ -59,7 +92,6 @@ export function OnboardingWizard({
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
   const currentStepName = steps[currentStepIndex]?.label || 'Onboarding';
 
-  // Save questionnaire responses to server
   const handleSaveQuestionnaire = async (newResponses: Record<string, any>) => {
     setResponses(newResponses);
     try {
@@ -72,7 +104,7 @@ export function OnboardingWizard({
         }),
       });
     } catch (err) {
-      console.warn('Silent auto-save notice:', err);
+      console.warn('Auto-save notice:', err);
     }
     setCurrentStep('assets');
   };
@@ -104,6 +136,8 @@ export function OnboardingWizard({
         body: JSON.stringify({
           token,
           responses,
+          platform_access: accessData,
+          payment,
         }),
       });
 
@@ -126,11 +160,11 @@ export function OnboardingWizard({
         <BrandingHeader
           agency={agency}
           currentStepIndex={currentStepIndex}
-          totalSteps={steps.length - 1} // Don't count complete as a fractional step
+          totalSteps={steps.length - 1}
           stepName={currentStepName}
         />
 
-        <main className="px-4 sm:px-6 py-6 sm:py-10">
+        <main className="px-4 sm:px-6 py-6 sm:py-10 max-w-4xl mx-auto">
           {currentStep === 'welcome' && (
             <WizardStepWelcome
               agency={agency}
@@ -169,9 +203,66 @@ export function OnboardingWizard({
               uploads={uploads}
               onUploadSuccess={handleUploadSuccess}
               onDeleteUpload={handleDeleteUpload}
-              onNext={() => setCurrentStep('checklist')}
+              onNext={() => setCurrentStep('access')}
               onBack={() => setCurrentStep('assets')}
             />
+          )}
+
+          {currentStep === 'access' && (
+            <div className="space-y-6">
+              <WizardStepAccess
+                accessData={accessData}
+                onChange={setAccessData}
+              />
+              <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentStep('contract')}
+                  className="text-xs gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setCurrentStep('payment')}
+                  className="text-xs gap-1.5 cursor-pointer bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800"
+                >
+                  Next: Retainer / Deposit &rarr;
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 'payment' && (
+            <div className="space-y-6">
+              <WizardStepPayment
+                payment={payment}
+                agency={agency}
+                onPaymentConfirmed={setPayment}
+              />
+              <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentStep('access')}
+                  className="text-xs gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setCurrentStep('checklist')}
+                  className="text-xs gap-1.5 cursor-pointer bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800"
+                >
+                  Next: Final Review &rarr;
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
           )}
 
           {currentStep === 'checklist' && (
@@ -182,7 +273,7 @@ export function OnboardingWizard({
               uploads={uploads}
               checklistItems={checklistItems}
               onSubmit={handleSubmitAll}
-              onBack={() => setCurrentStep('contract')}
+              onBack={() => setCurrentStep('payment')}
               isSubmitting={isSubmitting}
             />
           )}

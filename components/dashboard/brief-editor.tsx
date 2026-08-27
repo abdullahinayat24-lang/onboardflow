@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProjectBrief } from '@/types';
+import { ProjectBrief, BriefStatus } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,11 +26,11 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
   const { success, error } = useToast();
   const [summary, setSummary] = useState(brief?.ai_summary || '');
   const [briefText, setBriefText] = useState(brief?.ai_brief || '');
-  const [status, setStatus] = useState<'draft' | 'final'>(brief?.status || 'draft');
+  const [status, setStatus] = useState<BriefStatus>(brief?.status || 'draft');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = async (newStatus?: 'draft' | 'final') => {
+  const handleSave = async (newStatus?: BriefStatus) => {
     setIsSaving(true);
     const targetStatus = newStatus || status;
 

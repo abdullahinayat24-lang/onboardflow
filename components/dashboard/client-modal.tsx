@@ -5,39 +5,77 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { QuestionnaireTemplate, ChecklistTemplate, Client } from '@/types';
-import { Copy, Check, Send, Sparkles } from 'lucide-react';
+import { QuestionnaireTemplate, ChecklistTemplate, Client, ServiceCategory } from '@/types';
+import { Copy, Check, Sparkles, Share2, Palette, Video, Globe, Layers } from 'lucide-react';
 
 interface ClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  questionnaireTemplates: QuestionnaireTemplate[];
-  checklistTemplates: ChecklistTemplate[];
+  questionnaireTemplates?: QuestionnaireTemplate[];
+  checklistTemplates?: ChecklistTemplate[];
   onClientCreated?: (client: Client) => void;
 }
 
 export function ClientModal({
   isOpen,
   onClose,
-  questionnaireTemplates,
-  checklistTemplates,
+  questionnaireTemplates = [],
+  checklistTemplates = [],
   onClientCreated,
 }: ClientModalProps) {
   const { success, error } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
-  const [questionnaireTemplateId, setQuestionnaireTemplateId] = useState<string>(
-    questionnaireTemplates[0]?.id || ''
-  );
-  const [checklistTemplateId, setChecklistTemplateId] = useState<string>(
-    checklistTemplates[0]?.id || ''
-  );
+  const [serviceCategory, setServiceCategory] = useState<ServiceCategory>('social_media');
+  const [questionnaireTemplateId, setQuestionnaireTemplateId] = useState<string>('tpl_social_media');
   const [sendInvite, setSendInvite] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const [createdClient, setCreatedClient] = useState<Client | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const serviceOptions: {
+    id: ServiceCategory;
+    templateId: string;
+    label: string;
+    icon: any;
+    desc: string;
+  }[] = [
+    {
+      id: 'social_media',
+      templateId: 'tpl_social_media',
+      label: 'Social Media & Content',
+      icon: Share2,
+      desc: 'Instagram, TikTok, Facebook posting & monthly calendar',
+    },
+    {
+      id: 'brand_design',
+      templateId: 'tpl_branding',
+      label: 'Brand Design & Artwork',
+      icon: Palette,
+      desc: 'Logos, vector illustration, style guides & colors',
+    },
+    {
+      id: 'video_production',
+      templateId: 'tpl_video',
+      label: 'Video & Reel Editing',
+      icon: Video,
+      desc: 'Short-form Reels, TikToks & promotional video cuts',
+    },
+    {
+      id: 'web_dev',
+      templateId: 'tpl_web',
+      label: 'Web & Digital Dev',
+      icon: Globe,
+      desc: 'Landing pages, web applications & CMS setup',
+    },
+  ];
+
+  const handleSelectService = (service: typeof serviceOptions[0]) => {
+    setServiceCategory(service.id);
+    setQuestionnaireTemplateId(service.templateId);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +93,9 @@ export function ClientModal({
           name,
           email,
           company: company || undefined,
-          questionnaire_template_id: questionnaireTemplateId || null,
-          checklist_template_id: checklistTemplateId || null,
+          service_category: serviceCategory,
+          questionnaire_template_id: questionnaireTemplateId || 'tpl_social_media',
+          checklist_template_id: 'demo-c-001',
           send_invitation_email: sendInvite,
         }),
       });
@@ -99,11 +138,11 @@ export function ClientModal({
     <Dialog
       isOpen={isOpen}
       onClose={handleReset}
-      title={createdClient ? 'Client Onboarding Ready 🎉' : 'Create New Client'}
+      title={createdClient ? 'Client Onboarding Ready 🎉' : 'Create New Client Intake'}
       description={
         createdClient
           ? 'Share this unique branded onboarding link with your client or let OnboardFlow email it directly.'
-          : 'Generate a branded, token-secured onboarding link for your new client.'
+          : 'Choose the service template and generate a branded zero-login onboarding link.'
       }
     >
       {createdClient ? (
@@ -123,7 +162,7 @@ export function ClientModal({
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="shrink-0 gap-1.5"
+                className="shrink-0 gap-1.5 cursor-pointer"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? 'Copied' : 'Copy'}
@@ -136,19 +175,60 @@ export function ClientModal({
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               What happens next?
             </p>
-            <p>1. Client opens the link (no login needed).</p>
-            <p>2. Fills out intake questionnaire & uploads assets.</p>
+            <p>1. Client opens the link without logging in.</p>
+            <p>2. Fills out intake, uploads raw assets & gives platform access.</p>
             <p>3. AI automatically drafts your team&apos;s project brief.</p>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="primary" onClick={handleReset}>
+            <Button variant="primary" onClick={handleReset} className="cursor-pointer">
               Done & View Client
             </Button>
           </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {/* Service Category Template Selector */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              Select Service Intake Template
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {serviceOptions.map((opt) => {
+                const Icon = opt.icon;
+                const isSelected = serviceCategory === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => handleSelectService(opt)}
+                    className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-zinc-900 bg-zinc-100/90 dark:border-zinc-100 dark:bg-zinc-800'
+                        : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/50'
+                    }`}
+                  >
+                    <div
+                      className={`p-2 rounded-lg shrink-0 ${
+                        isSelected
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                          : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                        {opt.label}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 line-clamp-1">{opt.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
               Client Name <span className="text-rose-500">*</span>
@@ -176,49 +256,13 @@ export function ClientModal({
 
           <div>
             <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-              Company / Organization (Optional)
+              Company / Brand (Optional)
             </label>
             <Input
-              placeholder="Acme Corp"
+              placeholder="Acme Apparel"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
             />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                Questionnaire Template
-              </label>
-              <select
-                value={questionnaireTemplateId}
-                onChange={(e) => setQuestionnaireTemplateId(e.target.value)}
-                className="w-full h-10 rounded-lg border border-zinc-300 bg-white px-3 text-xs text-zinc-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-              >
-                {questionnaireTemplates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} {t.is_default ? '(Default)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                Checklist Template
-              </label>
-              <select
-                value={checklistTemplateId}
-                onChange={(e) => setChecklistTemplateId(e.target.value)}
-                className="w-full h-10 rounded-lg border border-zinc-300 bg-white px-3 text-xs text-zinc-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-              >
-                {checklistTemplates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} {t.is_default ? '(Default)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div className="flex items-center gap-2 pt-2">
@@ -235,10 +279,10 @@ export function ClientModal({
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={handleReset}>
+            <Button type="button" variant="outline" onClick={handleReset} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isLoading}>
+            <Button type="submit" isLoading={isLoading} className="cursor-pointer">
               Create & Generate Link
             </Button>
           </div>

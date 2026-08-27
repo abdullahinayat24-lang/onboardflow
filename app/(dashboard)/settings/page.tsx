@@ -17,6 +17,9 @@ import {
   Globe,
   Bell,
   Eye,
+  Share2,
+  CreditCard,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -24,13 +27,20 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('branding');
 
   // Branding state
-  const [agencyName, setAgencyName] = useState('My Agency');
-  const [slug, setSlug] = useState('my-agency');
+  const [agencyName, setAgencyName] = useState('Velocity Creative Studio');
+  const [slug, setSlug] = useState('velocity-studio');
   const [logoUrl, setLogoUrl] = useState('');
   const [brandColor, setBrandColor] = useState('#3B82F6');
   const [website, setWebsite] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [isSavingBranding, setIsSavingBranding] = useState(false);
+
+  // Webhooks & Integrations
+  const [whatsappWebhookUrl, setWhatsappWebhookUrl] = useState('');
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
+  const [genericWebhookUrl, setGenericWebhookUrl] = useState('');
+  const [stripePaymentLink, setStripePaymentLink] = useState('https://buy.stripe.com/demo_checkout_link');
+  const [isSavingIntegrations, setIsSavingIntegrations] = useState(false);
 
   // Reminder settings state
   const [daysBeforeReminder, setDaysBeforeReminder] = useState(3);
@@ -81,6 +91,34 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSaveIntegrations = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingIntegrations(true);
+
+    try {
+      const res = await fetch('/api/settings/agency', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          whatsapp_webhook_url: whatsappWebhookUrl || null,
+          slack_webhook_url: slackWebhookUrl || null,
+          webhook_url: genericWebhookUrl || null,
+          stripe_payment_link: stripePaymentLink || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update integrations');
+
+      success('Integrations Saved!', 'Instant WhatsApp, Slack, and Stripe links updated.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error saving';
+      error('Failed to save', msg);
+    } finally {
+      setIsSavingIntegrations(false);
+    }
+  };
+
   const handleSaveReminders = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingReminders(true);
@@ -112,8 +150,13 @@ export default function SettingsPage() {
   const tabs = [
     {
       id: 'branding',
-      label: 'Agency Branding & White-Label',
+      label: 'Agency Branding & Logo',
       icon: <Palette className="w-4 h-4" />,
+    },
+    {
+      id: 'integrations',
+      label: 'WhatsApp, Slack & Stripe',
+      icon: <MessageSquare className="w-4 h-4" />,
     },
     {
       id: 'reminders',
@@ -126,7 +169,7 @@ export default function SettingsPage() {
     <div>
       <Header
         title="Agency Settings"
-        description="Configure your agency's white-label branding, logo, colors, and email automation"
+        description="Configure your agency's white-label branding, instant alerts, and email automation"
       />
 
       <div className="p-8 space-y-6 max-w-4xl mx-auto">
@@ -189,7 +232,7 @@ export default function SettingsPage() {
                         key={color.hex}
                         type="button"
                         onClick={() => setBrandColor(color.hex)}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all shadow-xs ${
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all shadow-xs cursor-pointer ${
                           brandColor.toLowerCase() === color.hex.toLowerCase()
                             ? 'ring-2 ring-offset-2 ring-zinc-900 dark:ring-zinc-100 scale-105'
                             : 'hover:scale-105'
@@ -245,7 +288,7 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                <Button type="submit" isLoading={isSavingBranding} className="text-xs gap-1.5">
+                <Button type="submit" isLoading={isSavingBranding} className="text-xs gap-1.5 cursor-pointer">
                   <Save className="w-3.5 h-3.5" />
                   Save Branding Settings
                 </Button>
@@ -290,6 +333,71 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardContent>
+            </Card>
+          </form>
+        )}
+
+        {activeTab === 'integrations' && (
+          <form onSubmit={handleSaveIntegrations} className="space-y-6">
+            <Card className="shadow-xs">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-emerald-500" />
+                  Instant Webhook & WhatsApp Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    WhatsApp Webhook URL (Zapier / Make / Twilio relay)
+                  </label>
+                  <Input
+                    type="url"
+                    value={whatsappWebhookUrl}
+                    onChange={(e) => setWhatsappWebhookUrl(e.target.value)}
+                    placeholder="https://hooks.zapier.com/hooks/catch/..."
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1">
+                    Triggers an instant WhatsApp alert to your phone when a client completes onboarding.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    Slack Channel Incoming Webhook URL
+                  </label>
+                  <Input
+                    type="url"
+                    value={slackWebhookUrl}
+                    onChange={(e) => setSlackWebhookUrl(e.target.value)}
+                    placeholder="https://hooks.slack.com/services/..."
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1">
+                    Posts new client AI briefs directly into your team&apos;s Slack channel.
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    Stripe Payment Link (For Retainers & Deposits)
+                  </label>
+                  <Input
+                    type="url"
+                    value={stripePaymentLink}
+                    onChange={(e) => setStripePaymentLink(e.target.value)}
+                    placeholder="https://buy.stripe.com/..."
+                  />
+                  <p className="text-[11px] text-zinc-400 mt-1">
+                    Used during the optional onboarding payment step for upfront invoice or deposit collection.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <Button type="submit" isLoading={isSavingIntegrations} className="text-xs gap-1.5 cursor-pointer">
+                  <Save className="w-3.5 h-3.5" />
+                  Save Integrations
+                </Button>
+              </CardFooter>
             </Card>
           </form>
         )}
@@ -365,7 +473,7 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                <Button type="submit" isLoading={isSavingReminders} className="text-xs gap-1.5">
+                <Button type="submit" isLoading={isSavingReminders} className="text-xs gap-1.5 cursor-pointer">
                   <Save className="w-3.5 h-3.5" />
                   Save Reminder Settings
                 </Button>

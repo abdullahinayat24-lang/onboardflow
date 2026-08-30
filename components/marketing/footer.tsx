@@ -36,7 +36,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="pt-8 border-t border-zinc-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <p>&copy; {new Date().getFullYear()} OnboardFlow SaaS. All rights reserved.</p>
+          <p>&copy; 2026 OnboardFlow SaaS. All rights reserved.</p>
           <div className="flex items-center gap-2 text-zinc-400">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Encrypted in transit & at rest</span>

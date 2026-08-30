@@ -7,34 +7,46 @@ import { sendClientInvitationEmail } from '@/lib/email/resend';
 import { localStore } from '@/lib/store';
 import { Client } from '@/types';
 
+const isUUID = (str?: string | null) =>
+  !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const admin = createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    let agencyId: string | null = null;
     if (user) {
       const { data: agency } = await supabase
         .from('agencies')
         .select('id')
         .eq('owner_user_id', user.id)
         .single();
+      if (agency) agencyId = agency.id;
+    }
 
-      if (agency) {
-        const { data: clients, error } = await supabase
-          .from('clients')
-          .select(`
-            *,
-            brief:project_briefs(*),
-            responses:questionnaire_responses(*),
-            checklist_status:client_checklist_status(*),
-            uploads(*)
-          `)
-          .eq('agency_id', agency.id)
-          .order('created_at', { ascending: false });
+    if (!agencyId) {
+      const { data: firstAgency } = await admin.from('agencies').select('id').limit(1).single();
+      if (firstAgency) agencyId = firstAgency.id;
+    }
 
-        if (!error && clients && clients.length > 0) {
-          return NextResponse.json({ clients });
-        }
+    if (agencyId) {
+      const { data: clients, error } = await admin
+        .from('clients')
+        .select(`
+          *,
+          agency:agencies(*),
+          brief:project_briefs(*),
+          responses:questionnaire_responses(*),
+          checklist_status:client_checklist_status(*),
+          uploads(*)
+        `)
+        .eq('agency_id', agencyId)
+        .order('created_at', { ascending: false });
+
+      if (!error && clients && clients.length > 0) {
+        return NextResponse.json({ clients });
       }
     }
 
@@ -87,16 +99,17 @@ export async function POST(request: NextRequest) {
     const onboardingToken = generateOnboardingToken();
     const packageShareToken = generateShareToken();
 
-    const clientPayload: Client = {
+    let clientPayload: Client = {
       id: `client_${Date.now()}`,
       agency_id: agencyId || localStore.agency.id,
       name: validated.name,
       email: validated.email,
       company: validated.company || null,
+      service_category: (validated.service_category as any) || 'general',
       status: 'invited',
       onboarding_token: onboardingToken,
       package_share_token: packageShareToken,
-      questionnaire_template_id: validated.questionnaire_template_id || 'demo-q-001',
+      questionnaire_template_id: validated.questionnaire_template_id || 'tpl_social_media',
       checklist_template_id: validated.checklist_template_id || 'demo-c-001',
       last_activity_at: new Date().toISOString(),
       completed_at: null,
@@ -104,22 +117,47 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Store in localStore
-    localStore.clients.set(clientPayload.id, clientPayload);
-
-    // Try persisting to Supabase if connected
+    // Try persisting to Supabase
     try {
+      const dbPayload: any = {
+        agency_id: agencyId || localStore.agency.id,
+        name: validated.name,
+        email: validated.email,
+        company: validated.company || null,
+        status: 'invited',
+        onboarding_token: onboardingToken,
+        package_share_token: packageShareToken,
+        questionnaire_template_id: isUUID(validated.questionnaire_template_id)
+          ? validated.questionnaire_template_id
+          : null,
+        checklist_template_id: isUUID(validated.checklist_template_id)
+          ? validated.checklist_template_id
+          : null,
+        last_activity_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       const { data: newClient, error: insertErr } = await admin
         .from('clients')
-        .insert(clientPayload)
+        .insert(dbPayload)
         .select('*')
         .single();
+
       if (!insertErr && newClient) {
-        // Successful Supabase insert
+        clientPayload = {
+          ...clientPayload,
+          id: newClient.id,
+        };
+      } else if (insertErr) {
+        console.warn('Supabase client insert notice:', insertErr);
       }
-    } catch {
-      // Offline fallback
+    } catch (e) {
+      console.warn('Supabase client insert exception:', e);
     }
+
+    // Store in localStore
+    localStore.clients.set(clientPayload.id, clientPayload);
 
     // Dispatch Invitation Email if requested
     const targetAgency = agencyRecord || localStore.agency;
@@ -137,7 +175,7 @@ export async function POST(request: NextRequest) {
           supportEmail: targetAgency.support_email,
         },
         onboardingUrl,
-      });
+      }).catch((e) => console.warn('Email dispatch warning:', e));
     }
 
     return NextResponse.json({ client: clientPayload }, { status: 201 });

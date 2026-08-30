@@ -15,14 +15,14 @@ class LocalDataStore {
   private static instance: LocalDataStore;
 
   public agency: Agency = {
-    id: 'demo-agency-001',
-    owner_user_id: 'demo-user-001',
-    name: 'Velocity Creative & Professional Studio',
-    slug: 'velocity-studio',
+    id: '32c8d149-f62a-405c-94eb-eaf411d82261',
+    owner_user_id: 'b8c03c95-4cb7-44ec-ab89-61eb5e664d5b',
+    name: 'I Digital Fun',
+    slug: 'i-digital-fun',
     logo_url: null,
     brand_color: '#3B82F6',
-    website: 'https://velocitystudio.com',
-    support_email: 'hello@velocitystudio.com',
+    website: 'https://idigitalfun.com',
+    support_email: 'hello@idigitalfun.com',
     webhook_url: null,
     whatsapp_webhook_url: null,
     slack_webhook_url: null,
@@ -312,10 +312,10 @@ class LocalDataStore {
   }
 
   public static getInstance(): LocalDataStore {
-    if (!LocalDataStore.instance) {
-      LocalDataStore.instance = new LocalDataStore();
+    if (!(globalThis as any).__localStoreInstance) {
+      (globalThis as any).__localStoreInstance = new LocalDataStore();
     }
-    return LocalDataStore.instance;
+    return (globalThis as any).__localStoreInstance;
   }
 
   public getClientByToken(token: string): Client | undefined {

@@ -20,6 +20,26 @@ export type ServiceCategory =
   | 'legal_government'
   | 'general';
 
+export type PlanTier =
+  | 'free_trial'
+  | 'starter'
+  | 'pro'
+  | 'appsumo_tier1'
+  | 'appsumo_tier2'
+  | 'enterprise';
+
+export interface SubscriptionInfo {
+  plan_tier: PlanTier;
+  status: 'active' | 'trialing' | 'canceled' | 'past_due';
+  is_lifetime: boolean;
+  appsumo_code?: string | null;
+  active_clients_limit: number; // e.g. 10 or Infinity (-1)
+  ai_briefs_limit_per_month: number;
+  white_label_enabled: boolean;
+  custom_domain_enabled: boolean;
+  renews_at?: string | null;
+}
+
 export interface TemplateStepConfig {
   enable_media_uploads: boolean;
   enable_contract_upload: boolean;
@@ -42,6 +62,7 @@ export interface Agency {
   whatsapp_webhook_url?: string | null;
   slack_webhook_url?: string | null;
   stripe_payment_link?: string | null;
+  subscription?: SubscriptionInfo;
   created_at: string;
   updated_at: string;
 }

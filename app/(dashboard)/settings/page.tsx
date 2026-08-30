@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '@/components/dashboard/header';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,20 +20,24 @@ import {
   Share2,
   CreditCard,
   MessageSquare,
+  UploadCloud,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { success, error } = useToast();
+  const { success, error, info } = useToast();
   const [activeTab, setActiveTab] = useState('branding');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Branding state
-  const [agencyName, setAgencyName] = useState('Velocity Creative Studio');
-  const [slug, setSlug] = useState('velocity-studio');
+  const [agencyName, setAgencyName] = useState('I Digital Fun');
+  const [slug, setSlug] = useState('i-digital-fun');
   const [logoUrl, setLogoUrl] = useState('');
   const [brandColor, setBrandColor] = useState('#3B82F6');
   const [website, setWebsite] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [isSavingBranding, setIsSavingBranding] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   // Webhooks & Integrations
   const [whatsappWebhookUrl, setWhatsappWebhookUrl] = useState('');
@@ -51,6 +55,33 @@ export default function SettingsPage() {
   );
   const [isSavingReminders, setIsSavingReminders] = useState(false);
 
+  // Load existing agency data on mount
+  useEffect(() => {
+    async function loadAgency() {
+      try {
+        const res = await fetch('/api/settings/agency');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.agency) {
+            setAgencyName(data.agency.name || 'I Digital Fun');
+            setSlug(data.agency.slug || 'i-digital-fun');
+            setLogoUrl(data.agency.logo_url || '');
+            setBrandColor(data.agency.brand_color || '#3B82F6');
+            setWebsite(data.agency.website || '');
+            setSupportEmail(data.agency.support_email || '');
+            setWhatsappWebhookUrl(data.agency.whatsapp_webhook_url || '');
+            setSlackWebhookUrl(data.agency.slack_webhook_url || '');
+            setGenericWebhookUrl(data.agency.webhook_url || '');
+            setStripePaymentLink(data.agency.stripe_payment_link || 'https://buy.stripe.com/demo_checkout_link');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load agency data:', e);
+      }
+    }
+    loadAgency();
+  }, []);
+
   const presetColors = [
     { name: 'Blue', hex: '#3B82F6' },
     { name: 'Indigo', hex: '#6366F1' },
@@ -60,6 +91,38 @@ export default function SettingsPage() {
     { name: 'Amber', hex: '#F59E0B' },
     { name: 'Zinc', hex: '#18181B' },
   ];
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    info('Uploading Logo', 'Processing image file...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', 'asset');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      if (data.file_url) {
+        setLogoUrl(data.file_url);
+        success('Logo Uploaded! 🎉', 'Your agency logo has been attached.');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error uploading file';
+      error('Upload Failed', msg);
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   const handleSaveBranding = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +145,7 @@ export default function SettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update branding');
 
-      success('Branding Saved!', 'Your custom theme has been applied to all client flows.');
+      success('Branding Saved!', 'Your agency logo, name, and colors are now active on all client pages.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error saving';
       error('Failed to save', msg);
@@ -169,7 +232,7 @@ export default function SettingsPage() {
     <div>
       <Header
         title="Agency Settings"
-        description="Configure your agency's white-label branding, instant alerts, and email automation"
+        description="Configure your agency branding, upload your logo, set colors, and manage alerts"
       />
 
       <div className="p-8 space-y-6 max-w-4xl mx-auto">
@@ -179,7 +242,7 @@ export default function SettingsPage() {
           <form onSubmit={handleSaveBranding} className="space-y-6">
             <Card className="shadow-xs">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base">Branding & Identity</CardTitle>
+                <CardTitle className="text-base">Branding &amp; Identity</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -191,7 +254,7 @@ export default function SettingsPage() {
                       required
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder="e.g. Apex Digital"
+                      placeholder="e.g. I Digital Fun"
                     />
                   </div>
 
@@ -202,26 +265,48 @@ export default function SettingsPage() {
                     <Input
                       value={slug}
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      placeholder="apex-digital"
+                      placeholder="i-digital-fun"
                     />
                   </div>
                 </div>
 
+                {/* Logo Uploader / URL Field */}
                 <div>
                   <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Logo Image URL
+                    Agency Logo
                   </label>
-                  <Input
-                    type="url"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="https://yourdomain.com/logo.png"
-                  />
-                  <p className="text-[11px] text-zinc-400 mt-1">
-                    Direct link to a high-resolution PNG or SVG logo.
-                  </p>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      isLoading={isUploadingLogo}
+                      className="text-xs gap-1.5 cursor-pointer shrink-0"
+                    >
+                      <UploadCloud className="w-3.5 h-3.5 text-blue-500" />
+                      Upload Logo File (PNG, SVG, JPG)
+                    </Button>
+                    <span className="text-xs text-zinc-400">or paste direct image URL below:</span>
+                  </div>
+                  <div className="mt-2">
+                    <Input
+                      type="url"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      placeholder="https://yourdomain.com/logo.png"
+                    />
+                  </div>
                 </div>
 
+                {/* Brand Color Picker */}
                 <div>
                   <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
                     Primary Brand Color (Used across client onboarding)
@@ -270,7 +355,7 @@ export default function SettingsPage() {
                       type="url"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://youragency.com"
+                      placeholder="https://idigitalfun.com"
                     />
                   </div>
 
@@ -282,7 +367,7 @@ export default function SettingsPage() {
                       type="email"
                       value={supportEmail}
                       onChange={(e) => setSupportEmail(e.target.value)}
-                      placeholder="support@youragency.com"
+                      placeholder="support@idigitalfun.com"
                     />
                   </div>
                 </div>
@@ -308,7 +393,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs"
+                        className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-xs"
                         style={{ backgroundColor: brandColor }}
                       >
                         {logoUrl ? (
@@ -343,7 +428,7 @@ export default function SettingsPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-base flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-emerald-500" />
-                  Instant Webhook & WhatsApp Alerts
+                  Instant Webhook &amp; WhatsApp Alerts
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -379,7 +464,7 @@ export default function SettingsPage() {
 
                 <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
                   <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Stripe Payment Link (For Retainers & Deposits)
+                    Stripe Payment Link (For Retainers &amp; Deposits)
                   </label>
                   <Input
                     type="url"

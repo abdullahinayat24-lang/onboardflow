@@ -6,7 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { QuestionnaireTemplate, ChecklistTemplate, Client, ServiceCategory } from '@/types';
-import { Copy, Check, Sparkles, Share2, Palette, Video, Globe, Layers } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  Sparkles,
+  Share2,
+  Palette,
+  Video,
+  Globe,
+  FileSpreadsheet,
+  PackageCheck,
+  Scale,
+  Building,
+  Phone,
+} from 'lucide-react';
 
 interface ClientModalProps {
   isOpen: boolean;
@@ -27,6 +40,8 @@ export function ClientModal({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
+  const [website, setWebsite] = useState('');
+  const [phone, setPhone] = useState('');
   const [serviceCategory, setServiceCategory] = useState<ServiceCategory>('social_media');
   const [questionnaireTemplateId, setQuestionnaireTemplateId] = useState<string>('tpl_social_media');
   const [sendInvite, setSendInvite] = useState(true);
@@ -48,6 +63,20 @@ export function ClientModal({
       label: 'Social Media & Content',
       icon: Share2,
       desc: 'Instagram, TikTok, Facebook posting & monthly calendar',
+    },
+    {
+      id: 'accounting',
+      templateId: 'tpl_accounting',
+      label: 'Accounting & Tax Filing',
+      icon: FileSpreadsheet,
+      desc: 'P&L statements, tax returns & financial ledger setup',
+    },
+    {
+      id: 'supplier_vendor',
+      templateId: 'tpl_supplier',
+      label: 'Supplier & Procurement',
+      icon: PackageCheck,
+      desc: 'MOQ, catalogs, lead times & vendor agreement',
     },
     {
       id: 'brand_design',
@@ -130,6 +159,8 @@ export function ClientModal({
     setName('');
     setEmail('');
     setCompany('');
+    setWebsite('');
+    setPhone('');
     setCreatedClient(null);
     onClose();
   };
@@ -142,7 +173,7 @@ export function ClientModal({
       description={
         createdClient
           ? 'Share this unique branded onboarding link with your client or let OnboardFlow email it directly.'
-          : 'Choose the service template and generate a branded zero-login onboarding link.'
+          : 'Choose the service template and enter your client & company details.'
       }
     >
       {createdClient ? (
@@ -229,40 +260,56 @@ export function ClientModal({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-              Client Name <span className="text-rose-500">*</span>
-            </label>
-            <Input
-              required
-              placeholder="e.g. Sarah Connor"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Client Contact Name <span className="text-rose-500">*</span>
+              </label>
+              <Input
+                required
+                placeholder="e.g. Asif Dublin"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Email Address <span className="text-rose-500">*</span>
+              </label>
+              <Input
+                required
+                type="email"
+                placeholder="asif@acme.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-              Email Address <span className="text-rose-500">*</span>
-            </label>
-            <Input
-              required
-              type="email"
-              placeholder="sarah@acme.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Company / Brand Name
+              </label>
+              <Input
+                placeholder="Acme Apparel Ltd"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-              Company / Brand (Optional)
-            </label>
-            <Input
-              placeholder="Acme Apparel"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-            />
+            <div>
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Company Website / URL
+              </label>
+              <Input
+                type="url"
+                placeholder="https://acme.com"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2 pt-2">
@@ -283,7 +330,7 @@ export function ClientModal({
               Cancel
             </Button>
             <Button type="submit" isLoading={isLoading} className="cursor-pointer">
-              Create & Generate Link
+              Create &amp; Generate Link
             </Button>
           </div>
         </form>

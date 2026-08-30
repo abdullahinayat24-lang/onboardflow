@@ -39,8 +39,15 @@ export function WizardStepWelcome({
           Welcome to {agency.name}!
         </h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
-          Hi <strong>{client.name}</strong>, we are excited to work with you. Let&apos;s get your project
-          onboarding completed so our team can immediately start building your deliverables.
+          Hi <strong>{client.name}</strong>
+          {client.company ? (
+            <span>
+              {' '}
+              from <strong>{client.company}</strong>
+            </span>
+          ) : null}
+          , we are excited to work with you. Let&apos;s get your project onboarding completed so our
+          team can immediately start building your deliverables.
         </p>
       </div>
 
@@ -77,9 +84,9 @@ export function WizardStepWelcome({
                 </div>
                 <div>
                   <strong className="text-zinc-900 dark:text-zinc-100 block">
-                    Brand Assets & Media
+                    Brand Assets &amp; Required Documents
                   </strong>
-                  Logos, high-res photos, reference documents, or link folders.
+                  Logos, high-res photos, reference documents, or cloud folders.
                 </div>
               </div>
 
@@ -101,7 +108,7 @@ export function WizardStepWelcome({
             <Button
               size="lg"
               onClick={onStart}
-              className="w-full sm:w-auto px-8 gap-2 font-semibold shadow-md text-white"
+              className="w-full sm:w-auto px-8 gap-2 font-semibold shadow-md text-white cursor-pointer"
               style={{ backgroundColor: brandColor }}
             >
               Start Onboarding

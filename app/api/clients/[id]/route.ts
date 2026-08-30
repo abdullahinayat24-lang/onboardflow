@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { updateClientSchema } from '@/lib/validations/client';
 import { localStore } from '@/lib/store';
+import { Client } from '@/types';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -74,9 +75,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 
     const existing = localStore.clients.get(id);
     if (existing) {
-      const updated = {
+      const updated: Client = {
         ...existing,
         ...validated,
+        service_category: (validated.service_category as any) || existing.service_category,
         updated_at: new Date().toISOString(),
       };
       localStore.clients.set(id, updated);

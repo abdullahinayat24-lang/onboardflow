@@ -1,0 +1,11 @@
+Category,Item,Monthly (USD),Annual (USD),Notes & Unit Economics
+Revenue,Starter Plan ($29/mo),0,0,Pre-revenue turnkey asset
+Revenue,Growth Plan ($79/mo),0,0,Pre-revenue turnkey asset
+Revenue,Scale Plan ($199/mo),0,0,Pre-revenue turnkey asset
+Operating Expense,Vercel Serverless Hosting,0,0,Free starter tier ($20/mo at scale)
+Operating Expense,Supabase PostgreSQL DB & Auth,0,0,Free starter tier ($25/mo at scale)
+Operating Expense,AI Brief Engine (Claude/OpenAI),0.2,2.4,Estimated ~$0.002 per generated brief
+Operating Expense,Transactional Email (Resend),0,0,Free tier (3000 emails/mo)
+Financial Summary,Net Operating Overhead,0.2,2.4,Minimal baseline fixed infrastructure
+Financial Summary,Gross Profit Margin,98.50%,98.50%,High-margin serverless B2B SaaS
+Asset Classification,Listing Type,Turnkey Micro-SaaS,100% Full IP,Complete Next.js 16 source code + DB

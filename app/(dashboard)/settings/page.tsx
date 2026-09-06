@@ -30,8 +30,8 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Branding state
-  const [agencyName, setAgencyName] = useState('I Digital Fun');
-  const [slug, setSlug] = useState('i-digital-fun');
+  const [agencyName, setAgencyName] = useState('OnboardFlow Demo');
+  const [slug, setSlug] = useState('onboardflow-demo');
   const [logoUrl, setLogoUrl] = useState('');
   const [brandColor, setBrandColor] = useState('#3B82F6');
   const [website, setWebsite] = useState('');
@@ -63,8 +63,8 @@ export default function SettingsPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.agency) {
-            setAgencyName(data.agency.name || 'I Digital Fun');
-            setSlug(data.agency.slug || 'i-digital-fun');
+            setAgencyName(data.agency.name || 'OnboardFlow Demo');
+            setSlug(data.agency.slug || 'onboardflow-demo');
             setLogoUrl(data.agency.logo_url || '');
             setBrandColor(data.agency.brand_color || '#3B82F6');
             setWebsite(data.agency.website || '');
@@ -254,7 +254,7 @@ export default function SettingsPage() {
                       required
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
-                      placeholder="e.g. I Digital Fun"
+                      placeholder="e.g. OnboardFlow Demo"
                     />
                   </div>
 
@@ -265,7 +265,7 @@ export default function SettingsPage() {
                     <Input
                       value={slug}
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      placeholder="i-digital-fun"
+                      placeholder="onboardflow-demo"
                     />
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export default function SettingsPage() {
                       type="url"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://idigitalfun.com"
+                      placeholder="https://onboardflow-wheat.vercel.app"
                     />
                   </div>
 
@@ -367,7 +367,7 @@ export default function SettingsPage() {
                       type="email"
                       value={supportEmail}
                       onChange={(e) => setSupportEmail(e.target.value)}
-                      placeholder="support@idigitalfun.com"
+                      placeholder="support@onboardflow.com"
                     />
                   </div>
                 </div>

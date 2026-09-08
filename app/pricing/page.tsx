@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f8fafc] text-zinc-900 flex flex-col justify-between">
       <MarketingNavbar />
       <main className="flex-1">
         <PricingCards />

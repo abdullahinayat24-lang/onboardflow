@@ -50,25 +50,27 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-zinc-100">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-zinc-900">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
-        <div className="w-12 h-12 rounded-2xl bg-white text-zinc-950 flex items-center justify-center font-bold text-xl mx-auto shadow-md">
-          OF
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <Link href="/" className="inline-block">
+          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl mx-auto shadow-sm">
+            OF
+          </div>
+        </Link>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">
           Create Agency Account
-        </h2>
-        <p className="text-xs sm:text-sm text-zinc-400">
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-500">
           Turn signed clients into project-ready clients in minutes
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <Card className="shadow-2xl border-zinc-800 bg-zinc-900/90 text-white backdrop-blur-md">
+        <Card className="shadow-md border-zinc-200 bg-white text-zinc-900 rounded-3xl">
           <CardContent className="p-6 sm:p-8 space-y-5">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 mb-1">
                   Agency / Company Name
                 </label>
                 <Input
@@ -76,12 +78,12 @@ export default function SignUpPage() {
                   placeholder="e.g. Apex Digital Studio"
                   value={agencyName}
                   onChange={(e) => setAgencyName(e.target.value)}
-                  className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-white"
+                  className="bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400 text-xs focus-visible:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 mb-1">
                   Work Email Address
                 </label>
                 <Input
@@ -90,12 +92,12 @@ export default function SignUpPage() {
                   placeholder="you@agency.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-white"
+                  className="bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400 text-xs focus-visible:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 mb-1">
                   Create Password
                 </label>
                 <Input
@@ -104,22 +106,22 @@ export default function SignUpPage() {
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-white"
+                  className="bg-white border-zinc-300 text-zinc-900 placeholder:text-zinc-400 text-xs focus-visible:ring-blue-500"
                 />
               </div>
 
               <Button
                 type="submit"
                 isLoading={isLoading}
-                className="w-full text-xs font-semibold bg-white text-zinc-950 hover:bg-zinc-200"
+                className="w-full text-xs font-bold h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs cursor-pointer"
               >
                 Create Workspace &rarr;
               </Button>
             </form>
 
-            <div className="pt-4 border-t border-zinc-800 text-center text-xs text-zinc-400">
+            <div className="pt-4 border-t border-zinc-100 text-center text-xs text-zinc-500">
               Already have an account?{' '}
-              <Link href="/login" className="font-semibold text-white underline hover:text-blue-400">
+              <Link href="/login" className="font-semibold text-blue-600 hover:underline">
                 Sign in
               </Link>
             </div>

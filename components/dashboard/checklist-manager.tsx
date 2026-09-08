@@ -59,7 +59,7 @@ export function ChecklistManager({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-base font-bold text-zinc-900 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               Onboarding Deliverables Checklist
             </CardTitle>
@@ -67,13 +67,13 @@ export function ChecklistManager({
               Required items tracked automatically as the client completes the intake wizard.
             </p>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full text-zinc-700 dark:text-zinc-300">
+          <span className="text-xs font-semibold px-2.5 py-1 bg-zinc-100 rounded-full text-zinc-700">
             {completedCount} of {totalCount} Completed ({percent}%)
           </span>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+        <div className="divide-y divide-zinc-100">
           {items.map((item) => {
             const isCompleted = !!statusMap[item.id];
             const isLoading = loadingItemId === item.id;
@@ -82,7 +82,7 @@ export function ChecklistManager({
               <div
                 key={item.id}
                 onClick={() => handleToggle(item.id)}
-                className="py-3 px-2 flex items-start gap-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 rounded-lg cursor-pointer transition-colors select-none"
+                className="py-3 px-2 flex items-start gap-3 hover:bg-zinc-50 rounded-lg cursor-pointer transition-colors select-none"
               >
                 <button
                   type="button"
@@ -94,7 +94,7 @@ export function ChecklistManager({
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900" />
+                    <div className="w-5 h-5 rounded-md border border-zinc-300 bg-white" />
                   )}
                 </button>
 
@@ -103,18 +103,18 @@ export function ChecklistManager({
                     <p
                       className={`text-xs font-semibold ${
                         isCompleted
-                          ? 'line-through text-zinc-400 dark:text-zinc-500'
-                          : 'text-zinc-800 dark:text-zinc-200'
+                          ? 'line-through text-zinc-400'
+                          : 'text-zinc-900'
                       }`}
                     >
                       {item.label}
                     </p>
                     {item.required && (
-                      <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-900">
+                      <span className="text-[10px] uppercase font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300">
                         Required
                       </span>
                     )}
-                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
                       ({item.category})
                     </span>
                   </div>

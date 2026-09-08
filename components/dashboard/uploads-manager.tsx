@@ -32,10 +32,10 @@ export function UploadsManager({ uploads }: UploadsManagerProps) {
     <div className="space-y-6">
       {/* Contracts & Agreements Card */}
       <Card className="shadow-xs">
-        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <CardTitle className="text-base flex items-center gap-2">
+        <CardHeader className="pb-3 border-b border-zinc-100">
+          <CardTitle className="text-base font-bold text-zinc-900 flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
-            Signed Contracts & Agreements ({contracts.length})
+            Signed Contracts &amp; Agreements ({contracts.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
@@ -48,15 +48,15 @@ export function UploadsManager({ uploads }: UploadsManagerProps) {
               {contracts.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60"
+                  className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-zinc-50/60"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <FileText className="w-5 h-5 text-emerald-600 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                      <p className="text-xs font-semibold text-zinc-900 truncate">
                         {file.filename}
                       </p>
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="text-[10px] text-zinc-500">
                         {formatFileSize(file.file_size)} &bull; {formatDateTime(file.uploaded_at)}
                       </p>
                     </div>
@@ -74,11 +74,11 @@ export function UploadsManager({ uploads }: UploadsManagerProps) {
       </Card>
 
       {/* Brand Assets & Project Files */}
-      <Card className="shadow-xs">
-        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <CardTitle className="text-base flex items-center gap-2">
+      <Card className="shadow-xs bg-white">
+        <CardHeader className="pb-3 border-b border-zinc-100">
+          <CardTitle className="text-base font-bold text-zinc-900 flex items-center gap-2">
             <Archive className="w-5 h-5 text-blue-600" />
-            Uploaded Brand Assets & Files ({assets.length})
+            Uploaded Brand Assets &amp; Files ({assets.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
@@ -91,15 +91,15 @@ export function UploadsManager({ uploads }: UploadsManagerProps) {
               {assets.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60"
+                  className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 bg-zinc-50/60"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {getFileIcon(file.filename, file.mime_type)}
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                      <p className="text-xs font-semibold text-zinc-900 truncate">
                         {file.filename}
                       </p>
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="text-[10px] text-zinc-500">
                         {formatFileSize(file.file_size)} &bull; {file.category}
                       </p>
                     </div>

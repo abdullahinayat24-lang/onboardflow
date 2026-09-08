@@ -67,7 +67,7 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
     return (
       <Card className="p-8 text-center border-dashed">
         <Sparkles className="w-10 h-10 text-purple-500 mx-auto mb-3" />
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+        <h3 className="text-base font-semibold text-zinc-900">
           No AI Brief Generated Yet
         </h3>
         <p className="text-xs text-zinc-500 max-w-md mx-auto mt-1 mb-4">
@@ -81,18 +81,18 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
   return (
     <div className="space-y-6">
       {/* Executive Summary Card */}
-      <Card className="border-purple-200/80 dark:border-purple-900/50 bg-purple-50/20 dark:bg-purple-950/10 shadow-xs">
+      <Card className="border-purple-200 bg-purple-50/30 shadow-xs">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2 text-purple-950 dark:text-purple-200">
-              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <CardTitle className="text-base font-bold flex items-center gap-2 text-purple-950">
+              <Sparkles className="w-4 h-4 text-purple-600" />
               AI Executive Summary
             </CardTitle>
             <span
               className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
                 status === 'final'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300'
-                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border-amber-200'
               }`}
             >
               {status === 'final' ? 'Finalized' : 'Draft'}
@@ -104,11 +104,11 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
             <Textarea
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              className="min-h-[100px] text-xs font-sans bg-white dark:bg-zinc-900"
+              className="min-h-[100px] text-xs font-sans bg-white"
               placeholder="Executive summary..."
             />
           ) : (
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-line leading-relaxed">
+            <p className="text-xs text-zinc-800 whitespace-pre-line leading-relaxed">
               {summary}
             </p>
           )}
@@ -117,10 +117,10 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
 
       {/* Main Project Brief Document Card */}
       <Card className="shadow-xs">
-        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
+        <CardHeader className="pb-3 border-b border-zinc-100">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base">Structured Project Brief</CardTitle>
+              <CardTitle className="text-base font-bold text-zinc-900">Structured Project Brief</CardTitle>
               <p className="text-xs text-zinc-500">
                 Ready for project team kickoff, scope validation, and contractor handoff.
               </p>
@@ -180,12 +180,12 @@ export function BriefEditor({ clientId, brief, onSaved }: BriefEditorProps) {
             <Textarea
               value={briefText}
               onChange={(e) => setBriefText(e.target.value)}
-              className="min-h-[450px] font-mono text-xs bg-zinc-50/50 dark:bg-zinc-950 p-4 leading-relaxed"
+              className="min-h-[450px] font-mono text-xs bg-zinc-50 p-4 leading-relaxed text-zinc-900 border-zinc-300"
               placeholder="Markdown project brief..."
             />
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-xl prose-h2:text-base prose-h3:text-sm prose-p:text-xs prose-li:text-xs text-zinc-800 dark:text-zinc-200">
-              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed bg-transparent p-0 text-zinc-800 dark:text-zinc-200">
+            <div className="prose prose-sm max-w-none prose-headings:font-bold prose-h1:text-xl prose-h2:text-base prose-h3:text-sm prose-p:text-xs prose-li:text-xs text-zinc-900">
+              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed bg-transparent p-0 text-zinc-800">
                 {briefText}
               </pre>
             </div>

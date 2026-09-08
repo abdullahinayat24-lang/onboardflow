@@ -79,10 +79,10 @@ export function ClientDetailHeader({ client, onRefresh }: ClientDetailHeaderProp
   };
 
   return (
-    <div className="space-y-4 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+    <div className="space-y-4 pb-6 border-b border-zinc-200">
       <Link
         href="/clients"
-        className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-900 font-medium transition-colors"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Clients Directory
@@ -91,7 +91,7 @@ export function ClientDetailHeader({ client, onRefresh }: ClientDetailHeaderProp
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
               {client.name}
             </h1>
             <span
@@ -102,9 +102,9 @@ export function ClientDetailHeader({ client, onRefresh }: ClientDetailHeaderProp
             </span>
           </div>
 
-          <p className="text-xs text-zinc-500 mt-1">
-            {client.company ? <strong className="text-zinc-700 dark:text-zinc-300">{client.company} &bull; </strong> : null}
-            {client.email} &bull; Onboarding Link Token: <span className="font-mono text-zinc-600 dark:text-zinc-400">{client.onboarding_token.substring(0, 10)}...</span>
+          <p className="text-xs text-zinc-600 mt-1">
+            {client.company ? <strong className="text-zinc-800">{client.company} &bull; </strong> : null}
+            <span>{client.email}</span> &bull; Onboarding Link Token: <span className="font-mono text-zinc-700 font-medium">{client.onboarding_token.substring(0, 10)}...</span>
           </p>
         </div>
 

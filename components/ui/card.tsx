@@ -20,14 +20,14 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn('font-semibold text-lg leading-none tracking-tight text-zinc-900 dark:text-zinc-100', className)}
+      className={cn('font-semibold text-lg leading-none tracking-tight text-zinc-900', className)}
       {...props}
     />
   );
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm text-zinc-500 dark:text-zinc-400', className)} {...props} />;
+  return <p className={cn('text-sm text-zinc-500', className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

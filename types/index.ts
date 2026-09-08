@@ -102,6 +102,7 @@ export interface Client {
   payment?: PaymentInfo | null;
   last_activity_at: string | null;
   completed_at: string | null;
+  is_starred?: boolean;
   created_at: string;
   updated_at: string;
 }

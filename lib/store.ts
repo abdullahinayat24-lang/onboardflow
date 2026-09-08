@@ -293,6 +293,7 @@ class LocalDataStore {
       },
       last_activity_at: new Date().toISOString(),
       completed_at: null,
+      is_starred: true,
       created_at: new Date(Date.now() - 86400000).toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -316,6 +317,22 @@ class LocalDataStore {
       (globalThis as any).__localStoreInstance = new LocalDataStore();
     }
     return (globalThis as any).__localStoreInstance;
+  }
+
+  public toggleClientStar(clientId: string): boolean {
+    const client = this.clients.get(clientId);
+    if (!client) return false;
+    client.is_starred = !client.is_starred;
+    client.updated_at = new Date().toISOString();
+    return client.is_starred;
+  }
+
+  public setClientStar(clientId: string, isStarred: boolean): boolean {
+    const client = this.clients.get(clientId);
+    if (!client) return false;
+    client.is_starred = isStarred;
+    client.updated_at = new Date().toISOString();
+    return client.is_starred;
   }
 
   public getClientByToken(token: string): Client | undefined {

@@ -14,6 +14,8 @@ import {
   Zap,
   CreditCard,
   Globe,
+  Star,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Agency } from '@/types';
@@ -38,10 +40,16 @@ export function Sidebar({ agency }: SidebarProps) {
       active: pathname === '/',
     },
     {
-      label: 'Clients',
+      label: 'All Clients',
       href: '/clients',
       icon: Users,
-      active: pathname.startsWith('/clients'),
+      active: pathname === '/clients',
+    },
+    {
+      label: 'Starred Clients',
+      href: '/clients?tab=starred',
+      icon: Star,
+      active: pathname === '/clients' && typeof window !== 'undefined' && window.location.search.includes('starred'),
     },
     {
       label: 'Templates & AI',
@@ -72,10 +80,10 @@ export function Sidebar({ agency }: SidebarProps) {
   };
 
   return (
-    <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col justify-between shrink-0 h-screen sticky top-0">
+    <aside className="w-64 border-r border-zinc-200 bg-white flex flex-col justify-between shrink-0 h-screen sticky top-0 z-20">
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-zinc-200 dark:border-zinc-800 gap-3">
+        <div className="h-16 flex items-center px-6 border-b border-zinc-200 gap-3">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-xs"
             style={{ backgroundColor: brandColor }}
@@ -91,17 +99,30 @@ export function Sidebar({ agency }: SidebarProps) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+            <h1 className="font-semibold text-sm text-zinc-900 truncate">
               {agency?.name || 'OnboardFlow'}
             </h1>
             <p className="text-xs text-zinc-500 truncate">Agency Workspace</p>
           </div>
         </div>
 
+        {/* Gmail-Style Floating Compose / + New Client Pill */}
+        <div className="px-4 pt-4 pb-2">
+          <Link
+            href="/clients?action=new"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#c2e7ff] hover:bg-[#b3d7ef] text-[#001d35] font-semibold text-sm shadow-xs hover:shadow-sm transition-all duration-150 group cursor-pointer"
+          >
+            <div className="w-6 h-6 rounded-lg bg-white/80 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+              <Plus className="w-4 h-4" />
+            </div>
+            <span>New Client</span>
+          </Link>
+        </div>
+
         {/* Navigation */}
-        <div className="p-4 space-y-1.5">
-          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2">
-            Main Menu
+        <div className="px-3 py-2 space-y-1">
+          <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+            Mail &amp; Workflows
           </p>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -110,18 +131,18 @@ export function Sidebar({ agency }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group',
+                  'flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium transition-all group',
                   item.active
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    ? 'bg-[#d3e3fd] text-[#041e49] font-semibold'
+                    : 'text-zinc-700 hover:bg-[#f0f4f9] hover:text-zinc-900'
                 )}
               >
                 <Icon
                   className={cn(
                     'w-4 h-4 transition-colors',
                     item.active
-                      ? 'text-white dark:text-zinc-900'
-                      : 'text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100'
+                      ? 'text-[#041e49]'
+                      : 'text-zinc-500 group-hover:text-zinc-800'
                   )}
                 />
                 {item.label}

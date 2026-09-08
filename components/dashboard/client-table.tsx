@@ -4,16 +4,34 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ClientWithDetails } from '@/types';
 import { getStatusBadgeVariant, formatDate } from '@/lib/utils';
-import { Copy, Check, ExternalLink, Sparkles, FileText, ChevronRight } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  Sparkles,
+  FileText,
+  ChevronRight,
+  Star,
+  PanelRight,
+  ExternalLink,
+  ArrowUpRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/toast';
 
 interface ClientTableProps {
   clients: ClientWithDetails[];
+  selectedClientId?: string | null;
+  onSelectClient?: (client: ClientWithDetails) => void;
+  onToggleStar?: (clientId: string) => void;
 }
 
-export function ClientTable({ clients }: ClientTableProps) {
+export function ClientTable({
+  clients,
+  selectedClientId,
+  onSelectClient,
+  onToggleStar,
+}: ClientTableProps) {
   const { success } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -30,54 +48,97 @@ export function ClientTable({ clients }: ClientTableProps) {
 
   if (clients.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center bg-zinc-50/50 dark:bg-zinc-900/30">
+      <div className="rounded-2xl border border-dashed border-zinc-300 p-12 text-center bg-white">
         <FileText className="w-10 h-10 text-zinc-400 mx-auto mb-3" />
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">No clients found</h3>
+        <h3 className="text-base font-semibold text-zinc-900">No clients found</h3>
         <p className="text-xs text-zinc-500 max-w-sm mx-auto mt-1">
-          Create your first client to generate a branded onboarding link and test the automated flow.
+          Create your first client or star high-priority clients to track them here.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs">
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xs">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-zinc-600 dark:text-zinc-400">
-          <thead className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80 font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider text-[10px]">
+        <table className="w-full text-left text-xs text-zinc-600">
+          <thead className="border-b border-zinc-200 bg-[#f8fafc] font-semibold text-zinc-600 uppercase tracking-wider text-[10px]">
             <tr>
-              <th className="py-3.5 px-4 sm:px-6">Client / Company</th>
+              <th className="py-3 px-3 w-10 text-center">
+                <span className="sr-only">Star</span>
+              </th>
+              <th className="py-3.5 px-4">Client / Company</th>
               <th className="py-3.5 px-4">Status</th>
-              <th className="py-3.5 px-4 min-w-[140px]">Onboarding Progress</th>
-              <th className="py-3.5 px-4">AI Brief</th>
-              <th className="py-3.5 px-4">Created</th>
+              <th className="py-3.5 px-4 min-w-[130px]">Onboarding Progress</th>
+              <th className="py-3.5 px-4">AI Kickoff Brief</th>
+              <th className="py-3.5 px-4">Added</th>
               <th className="py-3.5 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200/80">
             {clients.map((client) => {
               const badge = getStatusBadgeVariant(client.status);
               const percent = client.completion_percentage || 0;
               const hasBrief = !!client.brief;
+              const isSelected = selectedClientId === client.id;
+              const isStarred = !!client.is_starred;
 
               return (
                 <tr
                   key={client.id}
-                  className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors group cursor-pointer"
+                  className={`transition-colors group cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#edf2fa]'
+                      : 'hover:bg-[#f2f6fc]'
+                  }`}
                   onClick={() => {
-                    window.location.href = `/clients/${client.id}`;
+                    if (onSelectClient) {
+                      onSelectClient(client);
+                    }
                   }}
                 >
-                  <td className="py-4 px-4 sm:px-6">
-                    <div className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
-                      {client.name}
+                  {/* Gmail Star Column */}
+                  <td
+                    className="py-4 pl-4 pr-1 text-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onToggleStar) onToggleStar(client.id);
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="p-1 rounded hover:bg-zinc-200/70 transition-colors cursor-pointer"
+                      title={isStarred ? 'Unstar client' : 'Star client'}
+                    >
+                      <Star
+                        className={`w-4 h-4 transition-all ${
+                          isStarred
+                            ? 'text-amber-500 fill-amber-400 scale-105'
+                            : 'text-zinc-300 hover:text-amber-400'
+                        }`}
+                      />
+                    </button>
+                  </td>
+
+                  {/* Client & Company */}
+                  <td className="py-4 px-4">
+                    <div className="font-semibold text-zinc-900 text-sm flex items-center gap-2">
+                      <span>{client.name}</span>
+                      {client.service_category && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-normal">
+                          {client.service_category.replace('_', ' ')}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                      {client.company ? <span>{client.company} &bull;</span> : null}
+                    <div className="text-zinc-400 flex items-center gap-1.5 mt-0.5 text-xs">
+                      {client.company ? (
+                        <span className="text-zinc-600 font-medium">{client.company} &bull;</span>
+                      ) : null}
                       <span>{client.email}</span>
                     </div>
                   </td>
 
+                  {/* Status Badge */}
                   <td className="py-4 px-4">
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${badge.bgClass} ${badge.textClass} ${badge.borderClass}`}
@@ -87,9 +148,10 @@ export function ClientTable({ clients }: ClientTableProps) {
                     </span>
                   </td>
 
+                  {/* Progress */}
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-between text-xs font-medium mb-1.5">
-                      <span className="text-zinc-800 dark:text-zinc-200">{percent}% complete</span>
+                      <span className="text-zinc-700">{percent}% complete</span>
                     </div>
                     <Progress
                       value={percent}
@@ -98,15 +160,17 @@ export function ClientTable({ clients }: ClientTableProps) {
                           ? 'bg-emerald-500'
                           : percent > 40
                           ? 'bg-amber-500'
-                          : 'bg-blue-500'
+                          : 'bg-blue-600'
                       }
+                      className="h-1.5"
                     />
                   </td>
 
+                  {/* AI Kickoff Brief */}
                   <td className="py-4 px-4">
                     {hasBrief ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 px-2.5 py-1 rounded-full">
-                        <Sparkles className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-full">
+                        <Sparkles className="w-3 h-3 text-purple-600" />
                         {client.brief?.status === 'final' ? 'Final Brief' : 'Draft Brief'}
                       </span>
                     ) : (
@@ -114,17 +178,23 @@ export function ClientTable({ clients }: ClientTableProps) {
                     )}
                   </td>
 
-                  <td className="py-4 px-4 text-zinc-400">
+                  {/* Date */}
+                  <td className="py-4 px-4 text-zinc-400 text-xs whitespace-nowrap">
                     {formatDate(client.created_at)}
                   </td>
 
+                  {/* Quick Action Bar (Gmail style hover actions) */}
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className="flex items-center justify-end gap-1.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Copy Link Button */}
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={(e) => handleCopy(e, client.onboarding_token, client.id)}
-                        className="h-7 text-xs px-2 gap-1 text-zinc-600 hover:text-zinc-900"
+                        className="h-7 text-xs px-2.5 gap-1 text-zinc-700 hover:text-blue-600 hover:border-blue-300 rounded-lg cursor-pointer"
                         title="Copy branded onboarding URL"
                       >
                         {copiedId === client.id ? (
@@ -135,9 +205,28 @@ export function ClientTable({ clients }: ClientTableProps) {
                         <span className="hidden sm:inline">Link</span>
                       </Button>
 
+                      {/* Inspect in Side Panel */}
+                      {onSelectClient && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onSelectClient(client)}
+                          className="h-7 w-7 p-0 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
+                          title="Inspect in right side panel"
+                        >
+                          <PanelRight className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+
+                      {/* Open Full Workspace */}
                       <Link href={`/clients/${client.id}`}>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                          <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-900 rounded-lg cursor-pointer"
+                          title="Open full client page"
+                        >
+                          <ArrowUpRight className="w-4 h-4" />
                         </Button>
                       </Link>
                     </div>
@@ -151,3 +240,4 @@ export function ClientTable({ clients }: ClientTableProps) {
     </div>
   );
 }
+

@@ -44,10 +44,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
+    <div className="flex min-h-screen bg-[#f6f8fc] text-[#1f1f1f] font-sans antialiased">
       <Sidebar agency={agency} />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 pb-16">{children}</main>
+        <main className="flex-1 pb-12">{children}</main>
       </div>
     </div>
   );

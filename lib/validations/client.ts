@@ -16,6 +16,7 @@ export const updateClientSchema = z.object({
   company: z.string().optional().nullable(),
   service_category: z.string().optional().nullable(),
   status: z.enum(['invited', 'in_progress', 'completed']).optional(),
+  is_starred: z.boolean().optional(),
   questionnaire_template_id: z.string().optional().nullable(),
   checklist_template_id: z.string().optional().nullable(),
 });

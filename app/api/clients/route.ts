@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       checklist_template_id: validated.checklist_template_id || 'demo-c-001',
       last_activity_at: new Date().toISOString(),
       completed_at: null,
+      is_starred: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

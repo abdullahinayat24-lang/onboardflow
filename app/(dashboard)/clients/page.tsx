@@ -8,7 +8,8 @@ import { ClientModal } from '@/components/dashboard/client-modal';
 import { RightShortcutPanel, RightPanelTab } from '@/components/dashboard/right-shortcut-panel';
 import { Tabs } from '@/components/ui/tabs';
 import { ClientWithDetails, QuestionnaireTemplate, ChecklistTemplate, Agency, Client } from '@/types';
-import { Star, UserPlus, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import { Star, UserPlus, FileText, CheckCircle2, Sparkles, LayoutGrid, List } from 'lucide-react';
+import { ClientCardGrid } from '@/components/dashboard/client-card-grid';
 
 export default function ClientsPage() {
   const searchParams = useSearchParams();
@@ -17,6 +18,7 @@ export default function ClientsPage() {
   const [checklistTemplates, setChecklistTemplates] = useState<ChecklistTemplate[]>([]);
   const [agency, setAgency] = useState<Agency | null>(null);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -208,31 +210,74 @@ export default function ClientsPage() {
       <div className="flex flex-1 min-w-0">
         {/* Center Main Content Area */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-5">
-          {/* Controls: Filter Tabs */}
+          {/* Controls: Filter Tabs & View Switcher */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-zinc-200 shadow-2xs">
             <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
             <div className="flex items-center gap-2">
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-zinc-100 p-0.5 rounded-lg border border-zinc-200">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('cards')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    viewMode === 'cards'
+                      ? 'bg-white text-zinc-900 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900'
+                  }`}
+                  title="Card Grid (11 Action Controls)"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    viewMode === 'table'
+                      ? 'bg-white text-zinc-900 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900'
+                  }`}
+                  title="List Table View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span>Table</span>
+                </button>
+              </div>
+
               <button
                 onClick={() => {
                   setRightPanelTab('add');
                   setIsRightPanelOpen(true);
                 }}
-                className="px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                className="px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors border border-emerald-200"
               >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Quick Add Shortcut</span>
+                <UserPlus className="w-3.5 h-3.5 text-emerald-600" />
+                <span>+ New Client</span>
               </button>
             </div>
           </div>
 
-          {/* Client Table */}
-          <ClientTable
-            clients={filteredClients}
-            selectedClientId={selectedClient?.id}
-            onSelectClient={handleSelectClient}
-            onToggleStar={handleToggleStar}
-          />
+          {/* Client Content: Cards View or Table View */}
+          {viewMode === 'cards' ? (
+            <ClientCardGrid
+              clients={filteredClients}
+              onToggleStar={handleToggleStar}
+              onClientUpdated={(updated) => {
+                setClients((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+              }}
+              onClientArchived={(archivedId) => {
+                setClients((prev) => prev.filter((c) => c.id !== archivedId));
+              }}
+            />
+          ) : (
+            <ClientTable
+              clients={filteredClients}
+              selectedClientId={selectedClient?.id}
+              onSelectClient={handleSelectClient}
+              onToggleStar={handleToggleStar}
+            />
+          )}
         </main>
 
         {/* Gmail-Style Right Shortcut Panel (Tasks/Keep/Details) */}

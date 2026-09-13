@@ -91,6 +91,8 @@ export interface Client {
   agency_id: string;
   name: string;
   email: string;
+  phone?: string | null;
+  website?: string | null;
   company: string | null;
   service_category?: ServiceCategory;
   status: ClientStatus;
@@ -103,9 +105,18 @@ export interface Client {
   last_activity_at: string | null;
   completed_at: string | null;
   is_starred?: boolean;
+  is_archived?: boolean;
+  archived_at?: string | null;
+  manager_id?: string | null;
+  manager?: Staff | null;
+  assigned_staff_ids?: string[];
+  assigned_staff?: Staff[];
+  project_status?: 'pending_onboarding' | 'ready_for_project' | 'in_progress' | 'delivered' | 'retainer';
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
+
 
 export interface QuestionnaireTemplate {
   id: string;
@@ -235,3 +246,210 @@ export interface ClientWithDetails extends Client {
   uploads?: Upload[];
   completion_percentage?: number;
 }
+
+// -----------------------------------------------------------------------------
+// Agency Operating System & Work Management Types
+// -----------------------------------------------------------------------------
+
+export type StaffRole = 'owner' | 'admin' | 'manager' | 'staff';
+export type StaffStatus = 'active' | 'inactive' | 'on_leave';
+
+export interface Staff {
+  id: string;
+  agency_id: string;
+  user_id?: string | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  avatar_url?: string | null;
+  role: StaffRole;
+  department: string;
+  status: StaffStatus;
+  is_online: boolean;
+  manager_id?: string | null;
+  manager_name?: string | null;
+  assigned_clients_count?: number;
+  active_tasks_count?: number;
+  completed_tasks_count?: number;
+  overdue_tasks_count?: number;
+  performance_score?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Department {
+  id: string;
+  agency_id: string;
+  name: string;
+  description?: string | null;
+  color: string;
+  created_at: string;
+}
+
+export interface Project {
+  id: string;
+  agency_id: string;
+  client_id: string;
+  client?: Client;
+  title: string;
+  description?: string | null;
+  status: 'planning' | 'active' | 'in_review' | 'completed' | 'on_hold';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  manager_id?: string | null;
+  manager?: Staff | null;
+  start_date?: string | null;
+  due_date?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'completed' | 'cancelled';
+
+export interface TaskChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface TaskAttachment {
+  id: string;
+  name: string;
+  url: string;
+  size?: number;
+}
+
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  author_id?: string | null;
+  author_name: string;
+  content: string;
+  created_at: string;
+}
+
+export interface Task {
+  id: string;
+  agency_id: string;
+  client_id?: string | null;
+  client?: Client | null;
+  project_id?: string | null;
+  project?: Project | null;
+  workflow_stage_id?: string | null;
+  title: string;
+  description?: string | null;
+  assigned_to?: string | null;
+  assignee?: Staff | null;
+  manager_id?: string | null;
+  manager?: Staff | null;
+  department?: string | null;
+  priority: TaskPriority;
+  status: TaskStatus;
+  due_date?: string | null;
+  completed_at?: string | null;
+  tags?: string[];
+  checklist?: TaskChecklistItem[];
+  attachments?: TaskAttachment[];
+  comments?: TaskComment[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type WorkflowStageStatus = 'pending' | 'current' | 'completed' | 'blocked' | 'overdue';
+
+export interface WorkflowStage {
+  id: string;
+  workflow_id: string;
+  title: string;
+  description?: string | null;
+  responsible_staff_id?: string | null;
+  responsible_staff?: Staff | null;
+  order_index: number;
+  status: WorkflowStageStatus;
+  due_date?: string | null;
+  completed_at?: string | null;
+  notes?: string | null;
+  tasks?: Task[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Workflow {
+  id: string;
+  agency_id: string;
+  client_id: string;
+  client?: Client | null;
+  project_id?: string | null;
+  project?: Project | null;
+  name: string;
+  description?: string | null;
+  status: 'active' | 'completed' | 'paused';
+  stages: WorkflowStage[];
+  current_stage_index?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NotificationType =
+  | 'task_assigned'
+  | 'task_overdue'
+  | 'onboarding_completed'
+  | 'stage_assigned'
+  | 'workflow_advanced'
+  | 'info';
+
+export interface Notification {
+  id: string;
+  agency_id: string;
+  recipient_id?: string | null;
+  title: string;
+  message: string;
+  type: NotificationType;
+  link?: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  agency_id: string;
+  actor_id?: string | null;
+  actor_name: string;
+  action: string;
+  entity_type: 'client' | 'task' | 'project' | 'workflow' | 'staff' | 'brief';
+  entity_id: string;
+  entity_title?: string | null;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface StaffWorkLog {
+  id: string;
+  agency_id: string;
+  staff_id: string;
+  staff_name?: string;
+  task_id?: string | null;
+  task_title?: string;
+  date: string;
+  hours_spent: number;
+  description?: string | null;
+  status: 'present' | 'remote' | 'half_day' | 'absent';
+  created_at: string;
+}
+
+export interface PerformanceReport {
+  staff_id: string;
+  staff_name: string;
+  avatar_url?: string | null;
+  department: string;
+  role: string;
+  tasks_assigned: number;
+  tasks_completed: number;
+  tasks_overdue: number;
+  completion_rate: number;
+  hours_logged: number;
+  active_clients_count: number;
+  performance_score: number;
+}
+

@@ -110,6 +110,13 @@ export async function POST(request: NextRequest) {
 
     localStore.briefs.set(fullClient.id, savedBrief);
 
+    // Auto-provision Project, Workflow, Kickoff Tasks, Internal Notifications & Audit
+    try {
+      localStore.provisionProjectFromOnboarding(fullClient.id);
+    } catch (provisionErr) {
+      console.error('Project auto-provision error:', provisionErr);
+    }
+
     // Try persisting to Supabase if connected
     try {
       await admin

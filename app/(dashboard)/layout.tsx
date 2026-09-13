@@ -1,7 +1,7 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { Sidebar } from '@/components/dashboard/sidebar';
+import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { localStore } from '@/lib/store';
 import { Agency } from '@/types';
 
@@ -43,12 +43,5 @@ export default async function DashboardLayout({
     agency = localStore.agency;
   }
 
-  return (
-    <div className="flex min-h-screen bg-[#f6f8fc] text-[#1f1f1f] font-sans antialiased">
-      <Sidebar agency={agency} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 pb-12">{children}</main>
-      </div>
-    </div>
-  );
+  return <DashboardShell agency={agency}>{children}</DashboardShell>;
 }
